@@ -1,0 +1,52 @@
+{
+  "name": "spectrum-fe",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/bootstrap": "^4.3.0",
+    "@types/immutable": "^3.8.7",
+    "@types/react-dom": "^16.8.4",
+    "@types/react-redux": "^7.0.9",
+    "@types/react-router-dom": "^4.3.3",
+    "@types/reactstrap": "^8.0.1",
+    "@types/redux-devtools-extension": "^2.13.2",
+    "@types/redux-thunk": "^2.1.0",
+    "@types/styled-components": "^4.1.15",
+    "axios": "^0.18.0",
+    "bootstrap": "^4.3.1",
+    "immutable": "^4.0.0-rc.12",
+    "polished": "^3.4.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-redux": "^7.0.3",
+    "react-router-dom": "^5.0.0",
+    "react-scripts": "^3.0.1",
+    "reactstrap": "^8.0.0",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-thunk": "^2.3.0",
+    "styled-components": "^4.2.0",
+    "typescript": "^3.4.5"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

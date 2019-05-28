@@ -1,0 +1,43 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es5",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "importHelpers": true,
+    "skipLibCheck": true,
+    "lib": [
+      "dom",
+      "esnext"
+    ],
+    "baseUrl": "src",
+    "plugins": [
+      {
+        "name": "typescript-tslint-plugin"
+      },
+      {
+        "name": "typescript-styled-plugin"
+      }
+    ],
+    "allowJs": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true
+  },
+  "exclude": [
+    "bin",
+    "node_modules"
+  ],
+  "include": [
+    "src",
+    "./src/ts/**/*"
+  ]
+}
