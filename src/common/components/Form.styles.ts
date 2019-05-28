@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { fieldAlike } from "../styles/form";
+import { black } from "../../common/styles/colors";
 
 type InputProps = {
   variant?: "pill" | "fill";
@@ -22,7 +23,7 @@ export const StyledFormLabelGroup = styled.div`
     margin: 0 0 5px;
     font-size: 13px;
     font-weight: 600;
-    color: #777;
+    color: ${black};
   }
 
   input,

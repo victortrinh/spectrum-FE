@@ -1,5 +1,6 @@
 import { createGlobalStyle } from "styled-components";
 import { fontSansSerif } from "./fonts";
+import { white, red } from './colors';
 
 export const GlobalStyle = createGlobalStyle`
   *,
@@ -18,7 +19,7 @@ export const GlobalStyle = createGlobalStyle`
     font-size: 1rem;
     font-weight: 400;
     line-height: 1.5;
-    color: #333;
+    color: ${white};
     text-align: left;
 
     &.noscroll {
@@ -41,7 +42,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .header {
-    font-size: 1.75rem;
+    font-size: 22px;
     padding-top: 20px;
     padding-bottom: 10px;
   }
@@ -50,5 +51,12 @@ export const GlobalStyle = createGlobalStyle`
     font-size: 1rem;
     margin-left: 15px;
     letter-spacing: 10px;
+  }
+
+  .error {
+    color: ${red};
+    padding-left: 5px;
+    float: left;
+    margin-bottom: 10px;
   }
 `;
