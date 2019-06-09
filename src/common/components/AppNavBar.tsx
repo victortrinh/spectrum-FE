@@ -75,7 +75,7 @@ export class AppNavBar extends React.PureComponent<Props, State> {
           />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
-              <UncontrolledDropdown nav inNavbar style={{ padding: "10px" }}>
+              <UncontrolledDropdown nav inNavbar>
                 <StyledDropdownToggle
                   nav
                   caret
@@ -144,7 +144,7 @@ const StyledDropdownToggle = styled(DropdownToggle)`
 
 const StyledNavbar = styled(Navbar)`
   padding: 0 !important;
-  background-color: ${black};
+  background-color: ${black} !important;
 
   @media only screen and (max-width: 768px) {
     height: 60px;
@@ -152,6 +152,15 @@ const StyledNavbar = styled(Navbar)`
 
   @media only screen and (max-width: 600px) {
     padding-left: 20px !important;
+  }
+
+  .navbar-collapse{
+    z-index: 1 !important;
+    background-color: ${black} !important;
+
+    li {
+      padding: 10px;
+    }
   }
 `;
 
