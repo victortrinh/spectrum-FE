@@ -2,7 +2,7 @@ export const primaryColor = "#FF9905";
 
 export const blue = '#43BBD7';
 export const lightBlue = '#E0F9FF';
-export const black = '#262034';
+export const black = '#000000';
 
 export const darkerGray = '#8B8B8B';
 export const darkGray = '#C3C3C3';

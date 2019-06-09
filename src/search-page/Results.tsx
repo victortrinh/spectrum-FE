@@ -179,6 +179,11 @@ const StyledResults = styled.div`
 
         @media only screen and (max-width: 768px) {
           min-height: 60px;
+          padding-left: 20px;
+        }
+
+        @media only screen and (max-width: 600px) {
+          padding-left: 30px;
         }
 
         display: flex;

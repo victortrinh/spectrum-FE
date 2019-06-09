@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import {
   Collapse,
   Navbar,
@@ -35,6 +35,7 @@ type Props = OwnProps;
 
 export class AppNavBar extends React.PureComponent<Props, State> {
   authenticationAPI: AuthenticationAPI = new AuthenticationAPI();
+  private dropdownComponent = createRef<HTMLDivElement>();
 
   constructor(props: any) {
     super(props);
@@ -43,6 +44,25 @@ export class AppNavBar extends React.PureComponent<Props, State> {
       isOpen: false
     };
   }
+
+  componentDidMount() {
+    document.addEventListener("click", this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
+  }
+
+  handleClickOutside = (event: any) => {
+    if (
+      this.dropdownComponent.current &&
+      !this.dropdownComponent.current.contains(event.target)
+    ) {
+      this.setState({
+        isOpen: false
+      });
+    }
+  };
 
   toggle = () => {
     this.setState({
@@ -64,7 +84,7 @@ export class AppNavBar extends React.PureComponent<Props, State> {
 
     return (
       <StyledNavbar className="navbar navbar-dark" expand="md">
-        <div className="container">
+        <div className="container" ref={this.dropdownComponent}>
           <NavbarBrand href="/">
             <img src={Logo} alt="Spectrum Logo" />
             <span className="logo">SPECTRUM</span>
@@ -75,7 +95,7 @@ export class AppNavBar extends React.PureComponent<Props, State> {
           />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
-              <UncontrolledDropdown nav inNavbar style={{ padding: "10px" }}>
+              <UncontrolledDropdown nav inNavbar>
                 <StyledDropdownToggle
                   nav
                   caret
@@ -144,7 +164,7 @@ const StyledDropdownToggle = styled(DropdownToggle)`
 
 const StyledNavbar = styled(Navbar)`
   padding: 0 !important;
-  background-color: ${black};
+  background-color: ${black} !important;
 
   @media only screen and (max-width: 768px) {
     height: 60px;
@@ -152,6 +172,15 @@ const StyledNavbar = styled(Navbar)`
 
   @media only screen and (max-width: 600px) {
     padding-left: 20px !important;
+  }
+
+  .navbar-collapse {
+    z-index: 1 !important;
+    background-color: ${black} !important;
+
+    li {
+      padding: 10px;
+    }
   }
 `;
 
