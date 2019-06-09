@@ -44,7 +44,7 @@ export class AuthenticationAPI {
       error => {
         return {
           isError: true,
-          data: error.response.data.message
+          data: error.response ? error.response.data.message : "Error with back-end"
         };
       }
     );
