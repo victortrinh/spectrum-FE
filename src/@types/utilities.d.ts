@@ -3,4 +3,5 @@ type Without<T> = { [P in keyof T]?: never };
 
 type OneOf<T, U> = (Without<T> & U) | (Without<U> & T);
 
-declare module 'formsy-react'
+declare module 'formsy-react';
+declare module 'react-minimal-pie-chart';

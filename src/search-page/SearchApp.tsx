@@ -2,7 +2,6 @@ import React, { createRef } from "react";
 import styled from "styled-components";
 import JumbotronImage from "../common/images/jumbotron.png";
 import RadioLogo from "../common/images/radio.svg";
-import MissingImage from "../common/images/missingSong.png";
 import AppContext from "AppContext";
 import { white } from "../common/styles/colors";
 import { StyledInput } from "../common/components/Form.styles";
@@ -11,6 +10,7 @@ import { Resource } from "common/components/Resource";
 import { Filter } from "./Filter";
 import { Results } from "./Results";
 import { TrackModel } from "./common/models/trackModel";
+import { LastFmAPI } from "common/api/lastfm";
 
 type State = {
   page: number;
@@ -24,6 +24,7 @@ type State = {
 
 export class SearchApp extends React.PureComponent<{}, State> {
   private searchInputRef = createRef<HTMLInputElement>();
+  lastFmApi: LastFmAPI = new LastFmAPI();
 
   constructor(props: any) {
     super(props);
@@ -61,41 +62,27 @@ export class SearchApp extends React.PureComponent<{}, State> {
         isLoading: true
       });
 
-      const response = await fetch(
-        `https://ws.audioscrobbler.com/2.0/?method=album.search&album=` +
-          searchTerm +
-          `&api_key=a09702ee21fe630efc366adf3c546342&format=json&limit=20`
-      );
+      const results = await this.lastFmApi.getTracks(searchTerm);
 
-      const results = await response.json();
+      const tracks = results.results.trackmatches.track;
+
+      await this.lastFmApi.setTrackInfo(tracks);
 
       this.setState({
-        isLoading: false
-      });
-
-      let index = 0;
-
-      this.setState({
+        isLoading: false,
         enteredSearchTerm: searchTerm,
         totalResults: results.results["opensearch:totalResults"],
-        tracks: results.results.albummatches.album.map((album: any) => ({
-          id: index++,
-          title: "Song name" + index,
-          length: "2:58",
-          genre: "hip-hop",
-          albumName: album.name,
-          artist: album.artist,
-          imageSrc:
-            album.image[2]["#text"] === ""
-              ? MissingImage
-              : album.image[2]["#text"],
-          url: album.url
+        tracks: tracks.map((track: any) => ({
+          id: track.mbid,
+          title: track.name,
+          length: track.length,
+          genre: track.genre,
+          albumName: track.album,
+          artist: track.artist,
+          imageSrc: track.imageSrc,
+          url: track.url
         }))
       });
-
-      if (this.searchInputRef.current) {
-        this.searchInputRef.current.value = "";
-      }
     }
   };
 
@@ -106,39 +93,28 @@ export class SearchApp extends React.PureComponent<{}, State> {
         moreResultsLoading: true
       }),
       async () => {
-        const response = await fetch(
-          `https://ws.audioscrobbler.com/2.0/?method=album.search&album=` +
-            this.state.searchTerm +
-            `&api_key=a09702ee21fe630efc366adf3c546342&format=json&limit=20&page=` +
-            this.state.page
+        const results = await this.lastFmApi.getTracks(
+          this.state.searchTerm,
+          this.state.page
         );
 
-        const results = await response.json();
+        const tracks = results.results.trackmatches.track;
 
-        this.setState({
-          moreResultsLoading: false
-        });
-
-        let index = this.state.tracks.reduce(
-          (max, track) => (track.id > max ? track.id : max),
-          this.state.tracks[0].id
-        ) + 1;
+        await this.lastFmApi.setTrackInfo(tracks);
 
         this.setState(prevState => ({
           ...prevState,
+          moreResultsLoading: false,
           tracks: prevState.tracks.concat(
-            results.results.albummatches.album.map((album: any) => ({
-              id: index++,
-              title: "Song name" + index,
-              length: "2:58",
-              genre: "hip-hop",
-              albumName: album.name,
-              artist: album.artist,
-              imageSrc:
-                album.image[2]["#text"] === ""
-                  ? MissingImage
-                  : album.image[2]["#text"],
-              url: album.url
+            tracks.map((track: any) => ({
+              id: track.mbid,
+              title: track.name,
+              length: track.length,
+              genre: track.genre,
+              albumName: track.album,
+              artist: track.artist,
+              imageSrc: track.imageSrc,
+              url: track.url
             }))
           )
         }));
@@ -235,7 +211,7 @@ const StyledSearchApp = styled.div`
         background-repeat: no-repeat;
         background-position: 1% 40%;
 
-        @media only screen and (max-width: 768px) {
+        @media only screen and (max-width: 767px) {
           background-position: 3% 40%;
         }
       }

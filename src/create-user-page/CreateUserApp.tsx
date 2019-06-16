@@ -267,7 +267,7 @@ const StyledCreateUserApp = styled.div`
       margin-top: 27px;
     }
 
-    @media only screen and (max-width: 768px) {
+    @media only screen and (max-width: 767px) {
       .inputGroup {
         margin-top: 10px;
       }

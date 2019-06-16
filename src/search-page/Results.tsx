@@ -83,8 +83,8 @@ export class Results extends React.Component<Props> {
             </StyledExportToCsvButton>
           </div>
           <div id="tracks">
-            {tracks.map(track => (
-              <div key={track.id} className="track row">
+            {tracks.map((track, index) => (
+              <div key={track.id + "-id:" + index} className="track row">
                 <div className="col-2 trackImage">
                   <img src={track.imageSrc} alt="Album" />
                 </div>
@@ -165,7 +165,7 @@ const StyledResults = styled.div`
           width: 80px;
         }
 
-        @media only screen and (max-width: 768px) {
+        @media only screen and (max-width: 767px) {
           img {
             height: 60px;
             width: 60px;
@@ -177,7 +177,7 @@ const StyledResults = styled.div`
         min-height: 80px;
         padding-left: 0;
 
-        @media only screen and (max-width: 768px) {
+        @media only screen and (max-width: 767px) {
           min-height: 60px;
           padding-left: 20px;
         }
@@ -241,7 +241,7 @@ const StyledResults = styled.div`
 const StyledExportToCsvButton = styled(StyledButton)`
   height: 32px !important;
 
-  @media only screen and (min-width: 768px) {
+  @media only screen and (min-width: 767px) {
     float: right;
   }
 

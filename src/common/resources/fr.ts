@@ -35,5 +35,8 @@ export const fr: any = {
   create: "Créer",
   alphanumeric: "Doit être alphanumérique",
   sixCharacters: "Doit contenir au moins 6 caractères",
-  eightCharacters: "Doit contenir au moins 8 caractères"
+  eightCharacters: "Doit contenir au moins 8 caractères",
+  maximumDbStorage: "Stockage maximum de la base de données",
+  currentDatabaseDistribution: "Distribution actuelle de la base de données",
+  availableOf: "disponible de"
 };
