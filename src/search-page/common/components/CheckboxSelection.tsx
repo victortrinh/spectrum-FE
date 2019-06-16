@@ -7,6 +7,9 @@ import { Resource } from "common/components/Resource";
 
 type OwnProps = {
   checkboxes: CheckboxModel[];
+  onChange: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+  marginLeft?: boolean;
+  select?: boolean;
 };
 
 type State = {
@@ -37,17 +40,19 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { checkboxes } = this.props;
+    const { checkboxes, marginLeft, select, onChange } = this.props;
     const { showAll } = this.state;
 
     return (
-      <StyledCheckboxSelection>
+      <StyledCheckboxSelection marginLeft={marginLeft}>
         {checkboxes.slice(0, 3).map(checkbox => (
           <div key={checkbox.id} className="custom-control custom-checkbox">
             <input
               type="checkbox"
               className="custom-control-input"
               id={checkbox.value + checkbox.id}
+              checked={select && checkbox.selected}
+              onChange={onChange}
             />
             <label
               className="custom-control-label"
@@ -65,6 +70,8 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
                   type="checkbox"
                   className="custom-control-input"
                   id={checkbox.value + checkbox.id}
+                  checked={select && checkbox.selected}
+                  onChange={onChange}
                 />
                 <label
                   className="custom-control-label"
@@ -86,27 +93,36 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
             </span>
           </>
         ) : (
-          <span className="show" onClick={this.onClickPositive}>
-            <input type="image" alt="Positive logo" src={PlusLogo} />
-            <Resource resourceKey="more" />
-          </span>
+          <>
+            {checkboxes.length > 3 && (
+              <span className="show" onClick={this.onClickPositive}>
+                <input type="image" alt="Positive logo" src={PlusLogo} />
+                <Resource resourceKey="more" />
+              </span>
+            )}
+          </>
         )}
       </StyledCheckboxSelection>
     );
   }
 }
 
-const StyledCheckboxSelection = styled.div`
+type StyledCheckboxSelectionProps = {
+  marginLeft?: boolean;
+};
+
+const StyledCheckboxSelection = styled.div<StyledCheckboxSelectionProps>`
   label {
     padding-left: 5px !important;
   }
 
   .custom-checkbox {
     padding-bottom: 5px;
+    margin-left: ${props => (props.marginLeft ? "10px" : null)};
   }
 
   .show {
-    margin-left: 25px;
+    margin-left: ${props => (props.marginLeft ? "35px" : "25px")};
     cursor: pointer;
 
     input {

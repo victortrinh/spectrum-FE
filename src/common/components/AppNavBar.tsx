@@ -166,7 +166,7 @@ const StyledNavbar = styled(Navbar)`
   padding: 0 !important;
   background-color: ${black} !important;
 
-  @media only screen and (max-width: 768px) {
+  @media only screen and (max-width: 767px) {
     height: 60px;
   }
 

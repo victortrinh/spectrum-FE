@@ -9,6 +9,14 @@ import { StyledButton } from "common/components/Button.styles";
 import { YearsSelector } from "./common/components/YearsSelector";
 
 export class Filter extends React.PureComponent {
+  onChangeCheckboxGenre = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    // TODO
+  };
+
+  onChangeCheckboxPrimitive = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    // TODO
+  };
+
   render() {
     return (
       <StyledFilter>
@@ -18,6 +26,7 @@ export class Filter extends React.PureComponent {
         <FilterSelection
           headerResourceKey="numberOfSongs"
           showFilterAtStart={true}
+          borderTop={true}
         >
           <div className="input-group">
             <StyledNumberOfSongsInput className="form-control" />
@@ -34,8 +43,12 @@ export class Filter extends React.PureComponent {
             <FilterSelection
               headerResourceKey="genres"
               showFilterAtStart={false}
+              borderTop={true}
             >
-              <CheckboxSelection checkboxes={context.genres} />
+              <CheckboxSelection
+                checkboxes={context.genres.filter(genre => genre.selected)}
+                onChange={this.onChangeCheckboxGenre}
+              />
             </FilterSelection>
           )}
         </AppContext.Consumer>
@@ -44,14 +57,21 @@ export class Filter extends React.PureComponent {
             <FilterSelection
               headerResourceKey="primitives"
               showFilterAtStart={false}
+              borderTop={true}
             >
-              <CheckboxSelection checkboxes={context.primitives} />
+              <CheckboxSelection
+                checkboxes={context.primitives.filter(
+                  primitive => primitive.selected
+                )}
+                onChange={this.onChangeCheckboxPrimitive}
+              />
             </FilterSelection>
           )}
         </AppContext.Consumer>
         <FilterSelection
           headerResourceKey="years"
           showFilterAtStart={false}
+          borderTop={true}
           borderBottom={true}
         >
           <YearsSelector defaultValue="1900" />
