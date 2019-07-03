@@ -1,15 +1,12 @@
-export const primaryColor = "#637381";
-export const primaryDisabledColor = '#B2BAC1';
+export const primaryColor = "#FF9905";
 
-export const darkerGray = '#7F7F7F'
-export const darkGray = '#ACACAC'
-export const lightGray = '#C8CDD5'
-export const lighterGray = '#ECEDF0'
+export const blue = '#43BBD7';
+export const lightBlue = '#E0F9FF';
+export const black = '#000000';
 
-export const gold = '#f7b500';
-
-export const red = '#E02020';
-
-export const tableAssetColors = [
-  darkerGray, darkGray, lightGray, lighterGray
-]
+export const darkerGray = '#8B8B8B';
+export const darkGray = '#C3C3C3';
+export const gray = '#D9D9D9';
+export const lightGray = '#F1F3F5';
+export const white = '#FFFFFF';
+export const red = '#ff0000';

@@ -25,8 +25,16 @@ export class UsersAPI {
       method,
       url: resource,
       data
-    }).then(resp => {
-      return resp.data ? resp.data : [];
-    });
+    }).then(
+      resp => {
+        return { isError: false, data: resp.data };
+      },
+      error => {
+        return {
+          isError: true,
+          data: error.response ? error.response.data.message : "Error with back-end"
+        };
+      }
+    );
   }
 }

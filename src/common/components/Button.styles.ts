@@ -1,5 +1,6 @@
 import styled, { css } from "styled-components";
-import { primaryColor, primaryDisabledColor } from "../styles/colors";
+import { darken } from "polished";
+import { primaryColor, gray, white, black, lightGray } from "../styles/colors";
 
 type Props = {
   variant?: "primary" | "secondary";
@@ -15,9 +16,9 @@ export const StyledButton = styled.button<Props>`
     letter-spacing: ${props.letterSpacing};
     height: 40px;
     padding: 0 25px;
-    color: #333;
-    border: 1px solid transparent;
-    background: transparent;
+    color: ${black};
+    border: 1px solid ${lightGray};
+    background: ${lightGray};
     border-radius: 3px;
     font-size: 14px;
     font-weight: bold;
@@ -26,14 +27,14 @@ export const StyledButton = styled.button<Props>`
     transition: background-color 0.2s linear;
 
     &:hover {
-      color: #333;
-      background: #f3f3f3;
+      background: ${darken(0.08, lightGray)};
+      border: 1px solid ${darken(0.08, lightGray)};
     }
 
     &:disabled,
     &:disabled:hover {
-      color: #b2b2b2;
-      background: #dddddd;
+      color: ${white};
+      background: ${gray};
       cursor: not-allowed;
     }
 
@@ -42,42 +43,26 @@ export const StyledButton = styled.button<Props>`
       css`
         background: ${primaryColor};
         border-color: ${primaryColor};
-        color: #fff;
+        color: ${white};
 
         &:hover {
-          background: #fff;
-          border: 1px solid ${primaryColor};
-          color: ${primaryColor};
-        }
-
-        &:disabled,
-        &:disabled:hover {
-          background: ${primaryDisabledColor};
-          border-color: ${primaryDisabledColor};
-          color: #fff;
-          cursor: not-allowed;
+          background: ${darken(0.08, primaryColor)};
+          border-color: ${darken(0.08, primaryColor)};
+          color: ${white};
         }
       `};
 
     ${props.variant &&
       props.variant === "secondary" &&
       css`
-        background: #fff;
+        background: ${white};
         border: 1px solid ${primaryColor};
         color: ${primaryColor};
 
         &:hover {
-          background: ${primaryColor};
-          border-color: ${primaryColor};
-          color: #fff;
-        }
-
-        &:disabled,
-        &:disabled:hover {
-          background: #fff;
-          border-color: ${primaryDisabledColor};
-          color: ${primaryDisabledColor};
-          cursor: not-allowed;
+          background: ${white};
+          border: 1px solid ${darken(0.08, primaryColor)};
+          color: ${darken(0.08, primaryColor)};
         }
       `};
   `};

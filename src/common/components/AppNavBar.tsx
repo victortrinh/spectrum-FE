@@ -1,4 +1,4 @@
-import React from "react";
+import React, { createRef } from "react";
 import {
   Collapse,
   Navbar,
@@ -13,66 +13,182 @@ import {
   DropdownItem
 } from "reactstrap";
 import Logo from "../images/logo.svg";
+import GlobeLogo from "../images/globe.svg";
+import { primaryColor, black, white } from "../styles/colors";
 import { Resource } from "common/components/Resource";
+import styled from "styled-components";
+import { darken } from "polished";
+import { AuthenticationAPI } from "common/api/authentication";
+
+type OwnProps = {
+  loggedIn: boolean;
+  language: string;
+  setLogIn: (loggedIn: boolean) => void;
+  setLanguage: (language: string) => void;
+};
 
 type State = {
   isOpen: boolean;
-  language: string;
 };
 
-export class AppNavBar extends React.PureComponent<{}, State> {
+type Props = OwnProps;
+
+export class AppNavBar extends React.PureComponent<Props, State> {
+  authenticationAPI: AuthenticationAPI = new AuthenticationAPI();
+  private dropdownComponent = createRef<HTMLDivElement>();
+
   constructor(props: any) {
     super(props);
 
-    this.toggle = this.toggle.bind(this);
     this.state = {
-      isOpen: false,
-      language: "en"
+      isOpen: false
     };
   }
 
-  toggle() {
+  componentDidMount() {
+    document.addEventListener("click", this.handleClickOutside);
+  }
+
+  componentWillUnmount() {
+    document.removeEventListener("click", this.handleClickOutside);
+  }
+
+  handleClickOutside = (event: any) => {
+    if (
+      this.dropdownComponent.current &&
+      !this.dropdownComponent.current.contains(event.target)
+    ) {
+      this.setState({
+        isOpen: false
+      });
+    }
+  };
+
+  toggle = () => {
     this.setState({
       isOpen: !this.state.isOpen
     });
-  }
+  };
+
+  onClick = (e: React.SyntheticEvent<HTMLButtonElement>) => {
+    this.props.setLanguage(e.currentTarget.value);
+  };
+
+  logOut = () => {
+    this.authenticationAPI.logout();
+    this.props.setLogIn(false);
+  };
 
   render() {
-    const { language } = this.state;
+    const { language, loggedIn } = this.props;
 
     return (
-      <Navbar className="navbar navbar-dark bg-dark" expand="md">
-        <div className="container">
+      <StyledNavbar className="navbar navbar-dark" expand="md">
+        <div className="container" ref={this.dropdownComponent}>
           <NavbarBrand href="/">
             <img src={Logo} alt="Spectrum Logo" />
             <span className="logo">SPECTRUM</span>
           </NavbarBrand>
-          <NavbarToggler onClick={this.toggle} />
+          <NavbarToggler
+            onClick={this.toggle}
+            style={{ borderColor: "transparent" }}
+          />
           <Collapse isOpen={this.state.isOpen} navbar>
             <Nav className="ml-auto" navbar>
               <UncontrolledDropdown nav inNavbar>
-                <DropdownToggle nav caret>
-                  {language === "en" ? "EN" : "FR"}
-                </DropdownToggle>
+                <StyledDropdownToggle
+                  nav
+                  caret
+                  style={{ color: white, fontWeight: "bold" }}
+                >
+                  <img
+                    src={GlobeLogo}
+                    alt="Globe Logo"
+                    style={{ paddingRight: "10px", paddingBottom: "1px" }}
+                  />
+                  {language.includes("fr") ? "Français" : "English"}
+                </StyledDropdownToggle>
                 <DropdownMenu right>
-                  <DropdownItem>EN</DropdownItem>
-                  <DropdownItem>FR</DropdownItem>
+                  <DropdownItem value="en" onClick={this.onClick}>
+                    English
+                  </DropdownItem>
+                  <DropdownItem value="fr" onClick={this.onClick}>
+                    Français
+                  </DropdownItem>
                 </DropdownMenu>
               </UncontrolledDropdown>
-              <NavItem>
-                <NavLink href="/login">
-                  <Resource resourceKey="login" />
-                </NavLink>
-              </NavItem>
-              <NavItem>
-                <NavLink href="/register">
-                  <Resource resourceKey="registerButton" />
-                </NavLink>
-              </NavItem>
+              {loggedIn && (
+                <NavItem
+                  style={{
+                    padding: "10px"
+                  }}
+                >
+                  <NavLink href="/admin" style={{ color: white }}>
+                    <Resource resourceKey="admin" />
+                  </NavLink>
+                </NavItem>
+              )}
+              <StyledNavItem
+                style={{
+                  padding: "10px"
+                }}
+              >
+                {loggedIn ? (
+                  <NavLink
+                    href="/"
+                    onClick={this.logOut}
+                    style={{ color: white }}
+                  >
+                    <Resource resourceKey="logout" />
+                  </NavLink>
+                ) : (
+                  <NavLink href="/login" style={{ color: white }}>
+                    <Resource resourceKey="login" />
+                  </NavLink>
+                )}
+              </StyledNavItem>
             </Nav>
           </Collapse>
         </div>
-      </Navbar>
+      </StyledNavbar>
     );
   }
 }
+
+const StyledDropdownToggle = styled(DropdownToggle)`
+  ::after {
+    margin-left: 10px !important;
+    vertical-align: 2px !important;
+  }
+`;
+
+const StyledNavbar = styled(Navbar)`
+  padding: 0 !important;
+  background-color: ${black} !important;
+
+  @media only screen and (max-width: 767px) {
+    height: 60px;
+  }
+
+  @media only screen and (max-width: 600px) {
+    padding-left: 20px !important;
+  }
+
+  .navbar-collapse {
+    z-index: 1 !important;
+    background-color: ${black} !important;
+
+    li {
+      padding: 10px;
+    }
+  }
+`;
+
+const StyledNavItem = styled(NavItem)`
+  background-color: ${primaryColor};
+
+  :hover {
+    cursor: pointer;
+    background-color: ${darken(0.08, primaryColor)};
+  }
+`;
