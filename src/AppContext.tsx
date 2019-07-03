@@ -12,7 +12,6 @@ type AppContext = {
 
 export default React.createContext<AppContext>({
   loggedIn: false,
-
   language: "",
   genres: [],
   primitives: [],

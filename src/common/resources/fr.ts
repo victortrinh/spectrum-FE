@@ -20,6 +20,7 @@ export const fr: any = {
   tracks: "chansons",
   doASearch: "Commencer une recherche pour voir des résultats",
   noResults: "Aucune résultats",
+  loading: "Chargement",
   contentLoading: "Chargement des résultats",
   mustBeEmail: "Doit suivre le format d'un courriel",
   loginButton: "Connexion",
@@ -31,6 +32,7 @@ export const fr: any = {
     "Vous n'êtes pas connecté ou vous n'avez pas la permission d'accéder cette page",
   adminPage: "Page admin",
   createUser: "Créer un admin",
+  addSongs: "Ajouter des chansons",
   users: "Utilisateurs",
   create: "Créer",
   alphanumeric: "Doit être alphanumérique",
@@ -38,5 +40,10 @@ export const fr: any = {
   eightCharacters: "Doit contenir au moins 8 caractères",
   maximumDbStorage: "Stockage maximum de la base de données",
   currentDatabaseDistribution: "Distribution actuelle de la base de données",
-  availableOf: "disponible de"
+  activatedFilters: "Filtres activés",
+  availableOf: "disponible de",
+  filterGenres: "Filtrer des genres",
+  filterPrimitives: "Filtrer des primitives",
+  selectAll: "Tout sélectionner",
+  deselectAll: "Tout déselectionner"
 };

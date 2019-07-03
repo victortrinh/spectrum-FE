@@ -8,13 +8,11 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import { SearchApp } from "./search-page/SearchApp";
 import { AppNavBar } from "./common/components/AppNavBar";
 import { CreateUserApp } from "create-user-page/CreateUserApp";
-import {
-  CheckboxModel,
-  genres,
-  primitives
-} from "search-page/common/models/checkboxModel";
+import { CheckboxModel } from "search-page/common/models/checkboxModel";
 import { AdminApp } from "admin-page/AdminPage";
-import { NeedPermissionApp } from 'need-permission-page/NeedPermissionApp';
+import { NeedPermissionApp } from "need-permission-page/NeedPermissionApp";
+import { GenresAPI } from "common/api/genres";
+import { PrimitivesAPI } from "common/api/primitives";
 
 type State = {
   loggedIn: boolean;
@@ -26,6 +24,9 @@ type State = {
 };
 
 export default class App extends React.Component<{}, State> {
+  genresAPI: GenresAPI = new GenresAPI();
+  primitivesAPI: PrimitivesAPI = new PrimitivesAPI();
+
   constructor(props: any) {
     super(props);
 
@@ -47,8 +48,34 @@ export default class App extends React.Component<{}, State> {
     };
   }
 
-  componentDidMount() {
-    // TODO: Use api to get primitives and genres
+  async componentDidMount() {
+    const genres = await this.genresAPI
+      .getGenres()
+      .then(data => data.data.genres);
+
+    genres.sort((a: CheckboxModel, b: CheckboxModel) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+
+    const primitives = await this.primitivesAPI
+      .getPrimitives()
+      .then(data => data.data.primitives);
+
+    primitives.sort((a: CheckboxModel, b: CheckboxModel) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
 
     this.setState({
       genres,
@@ -103,8 +130,8 @@ export default class App extends React.Component<{}, State> {
             )}
           />
           <Route path="/needPermission" component={NeedPermissionApp} />
-          <PrivateRoute path='/admin' component={AdminApp} />
-          <PrivateRoute path='/createUser' component={CreateUserApp} />
+          <PrivateRoute path="/admin" component={AdminApp} />
+          <Route path="/createUser" component={CreateUserApp} />
         </Router>
         <GlobalStyle />
       </AppContext.Provider>

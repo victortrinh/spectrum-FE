@@ -56,7 +56,10 @@ export class FilterSelection extends React.PureComponent<Props, State> {
         borderTop={borderTop}
         borderBottom={borderBottom}
       >
-        <div className="headerSection">
+        <div
+          className="headerSection clickable"
+          onClick={showFilter ? this.onClickNegative : this.onClickPositive}
+        >
           <Resource resourceKey={headerResourceKey} />
           {showFilter ? (
             <input
@@ -64,7 +67,6 @@ export class FilterSelection extends React.PureComponent<Props, State> {
               className="negativeSign"
               alt="Negative logo"
               src={MinusLogo}
-              onClick={this.onClickNegative}
             />
           ) : (
             <input
@@ -72,7 +74,6 @@ export class FilterSelection extends React.PureComponent<Props, State> {
               className="positiveSign"
               alt="Positive logo"
               src={PlusLogo}
-              onClick={this.onClickPositive}
             />
           )}
         </div>
