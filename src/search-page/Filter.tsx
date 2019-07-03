@@ -46,7 +46,7 @@ export class Filter extends React.PureComponent {
               borderTop={true}
             >
               <CheckboxSelection
-                checkboxes={context.genres.filter(genre => genre.selected)}
+                checkboxes={context.genres.filter(genre => genre.is_selected)}
                 onChange={this.onChangeCheckboxGenre}
               />
             </FilterSelection>
@@ -61,7 +61,7 @@ export class Filter extends React.PureComponent {
             >
               <CheckboxSelection
                 checkboxes={context.primitives.filter(
-                  primitive => primitive.selected
+                  primitive => primitive.is_selected
                 )}
                 onChange={this.onChangeCheckboxPrimitive}
               />

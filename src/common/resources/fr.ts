@@ -31,6 +31,7 @@ export const fr: any = {
     "Vous n'êtes pas connecté ou vous n'avez pas la permission d'accéder cette page",
   adminPage: "Page admin",
   createUser: "Créer un admin",
+  addSongs: "ajouter des chansons",
   users: "Utilisateurs",
   create: "Créer",
   alphanumeric: "Doit être alphanumérique",
@@ -38,5 +39,6 @@ export const fr: any = {
   eightCharacters: "Doit contenir au moins 8 caractères",
   maximumDbStorage: "Stockage maximum de la base de données",
   currentDatabaseDistribution: "Distribution actuelle de la base de données",
+  activatedFilters: "Filtres activés",
   availableOf: "disponible de"
 };
