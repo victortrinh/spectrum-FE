@@ -31,6 +31,7 @@ export const en: any = {
     "You are not logged in or you do not have permission to access this page",
   adminPage: "Admin page",
   createUser: "Create an admin",
+  addSongs: "Add songs",
   users: "Users",
   create: "Create",
   alphanumeric: "Must be alphanumeric",
@@ -38,5 +39,6 @@ export const en: any = {
   eightCharacters: "Must have at least 8 characters",
   maximumDbStorage: "Maximum database storage",
   currentDatabaseDistribution: "Current database distribution",
+  activatedFilters: "Activated filters",
   availableOf: "available of"
 };

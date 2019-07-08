@@ -50,15 +50,15 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
             <input
               type="checkbox"
               className="custom-control-input"
-              id={checkbox.value + checkbox.id}
-              checked={select && checkbox.selected}
+              id={checkbox.id.toString()}
+              defaultChecked={select && checkbox.is_selected}
               onChange={onChange}
             />
             <label
               className="custom-control-label"
-              htmlFor={checkbox.value + checkbox.id}
+              htmlFor={checkbox.id.toString()}
             >
-              {checkbox.value}
+              {checkbox.name}
             </label>
           </div>
         ))}
@@ -69,15 +69,15 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
                 <input
                   type="checkbox"
                   className="custom-control-input"
-                  id={checkbox.value + checkbox.id}
-                  checked={select && checkbox.selected}
+                  id={checkbox.id.toString()}
+                  defaultChecked={select && checkbox.is_selected}
                   onChange={onChange}
                 />
                 <label
                   className="custom-control-label"
-                  htmlFor={checkbox.value + checkbox.id}
+                  htmlFor={checkbox.id.toString()}
                 >
-                  {checkbox.value}
+                  {checkbox.name}
                 </label>
               </div>
             ))}
