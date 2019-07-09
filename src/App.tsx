@@ -55,7 +55,7 @@ export default class App extends React.Component<{}, State> {
 
     const primitives = await this.primitivesAPI
       .getPrimitives()
-      .then(data => data.data.songs);
+      .then(data => data.data.primitives);
 
     this.setState({
       genres,

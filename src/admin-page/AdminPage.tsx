@@ -33,15 +33,9 @@ export class AdminApp extends React.PureComponent<{}, State> {
   }
 
   async componentDidMount() {
-    const genres = await this.genresAPI.getStats().then(data =>
-      data.data.genres.map((genre: any) => ({
-        id: genre.id,
-        genre: genre.genre,
-        percentage: Number(
-          genre.percentage.substring(0, genre.percentage.length - 1)
-        )
-      }))
-    );
+    let genres = await this.genresAPI.getStats().then(data => data.data.genres);
+
+    genres = genres.filter((x: GenreModel) => x.percentage !== 0);
 
     const colors = randomColor({
       count: genres.length
