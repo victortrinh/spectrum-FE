@@ -80,7 +80,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
         color: colors[index]
       }))
     });
-  };
+  }
 
   createUser = () => {
     this.setState({
