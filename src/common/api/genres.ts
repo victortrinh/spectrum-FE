@@ -7,20 +7,20 @@ const client = axios.create({
 
 export type Genre = {
   id: number;
-  is_selected: boolean;
+  selected: boolean;
 };
 
 export class GenresAPI {
-  updateGenre(genre: Genre) {
-    return this.perform("put", "/api/update/genre", genre);
+  async updateGenre(genre: Genre) {
+    return await this.perform("put", "/api/genre/update", genre);
   }
 
   async getGenres() {
-    return this.perform("get", "/api/genres");
+    return this.perform("get", "/api/genre/all");
   }
 
   async getStats() {
-    return this.perform("get", "/api/stats");
+    return this.perform("get", "/api/genre/stats");
   }
 
   async perform(method: any, resource: any, data: Genre | null = null) {

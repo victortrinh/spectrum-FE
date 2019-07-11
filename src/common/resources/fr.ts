@@ -20,6 +20,7 @@ export const fr: any = {
   tracks: "chansons",
   doASearch: "Commencer une recherche pour voir des résultats",
   noResults: "Aucune résultats",
+  loading: "Chargement",
   contentLoading: "Chargement des résultats",
   mustBeEmail: "Doit suivre le format d'un courriel",
   loginButton: "Connexion",
@@ -40,5 +41,9 @@ export const fr: any = {
   maximumDbStorage: "Stockage maximum de la base de données",
   currentDatabaseDistribution: "Distribution actuelle de la base de données",
   activatedFilters: "Filtres activés",
-  availableOf: "disponible de"
+  availableOf: "disponible de",
+  filterGenres: "Filtrer des genres",
+  filterPrimitives: "Filtrer des primitives",
+  selectAll: "Tout sélectionner",
+  deselectAll: "Tout déselectionner"
 };

@@ -20,6 +20,7 @@ export const en: any = {
   tracks: "tracks",
   doASearch: "Start searching to see some results",
   noResults: "No results",
+  loading: "Loading",
   contentLoading: "Results loading",
   mustBeEmail: "This is not an e-mail format",
   loginButton: "Login",
@@ -40,5 +41,9 @@ export const en: any = {
   maximumDbStorage: "Maximum database storage",
   currentDatabaseDistribution: "Current database distribution",
   activatedFilters: "Activated filters",
-  availableOf: "available of"
+  availableOf: "available of",
+  filterGenres: "Filter genres",
+  filterPrimitives: "Filter primitives",
+  selectAll: "Select all",
+  deselectAll: "Deselect all"
 };

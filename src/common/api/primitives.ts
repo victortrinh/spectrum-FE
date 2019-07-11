@@ -7,16 +7,16 @@ const client = axios.create({
 
 export type Primitive = {
   id: number;
-  isSelected: string;
+  selected: boolean;
 };
 
 export class PrimitivesAPI {
   updatePrimitive(primitive: Primitive) {
-    return this.perform("put", "/api/update/primitive", primitive);
+    return this.perform("put", "/api/primitive/update", primitive);
   }
 
   async getPrimitives() {
-    return this.perform("get", "/api/primitives");
+    return this.perform("get", "/api/primitive/all");
   }
 
   async perform(method: any, resource: any, data: Primitive | null = null) {

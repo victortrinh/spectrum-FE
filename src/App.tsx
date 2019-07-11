@@ -53,9 +53,29 @@ export default class App extends React.Component<{}, State> {
       .getGenres()
       .then(data => data.data.genres);
 
+    genres.sort((a: CheckboxModel, b: CheckboxModel) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+
     const primitives = await this.primitivesAPI
       .getPrimitives()
       .then(data => data.data.primitives);
+
+    primitives.sort((a: CheckboxModel, b: CheckboxModel) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
 
     this.setState({
       genres,
