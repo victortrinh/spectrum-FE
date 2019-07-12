@@ -11,6 +11,7 @@ type OwnProps = {
   borderBottom?: boolean;
   borderTop?: boolean;
   backgroundHeader?: boolean;
+  id?: string;
 };
 
 type State = {
@@ -46,7 +47,8 @@ export class FilterSelection extends React.PureComponent<Props, State> {
       borderBottom,
       borderTop,
       children,
-      backgroundHeader
+      backgroundHeader,
+      id
     } = this.props;
     const { showFilter } = this.state;
 
@@ -77,7 +79,11 @@ export class FilterSelection extends React.PureComponent<Props, State> {
             />
           )}
         </div>
-        {showFilter && <div className="filterSection">{children}</div>}
+        {showFilter && (
+          <div id={id} className="filterSection">
+            {children}
+          </div>
+        )}
       </StyledFilterSelection>
     );
   }

@@ -14,20 +14,42 @@ import {
   black
 } from "common/styles/colors";
 import { StyledButton } from "common/components/Button.styles";
-import { TrackModel } from "./common/models/trackModel";
+import { Song } from "common/api/songs";
+import { Redirect } from "react-router";
 
 type OwnProps = {
   isLoading: boolean;
   moreResultsLoading: boolean;
-  totalResults: string;
+  totalResults: number;
   enteredSearchTerm: string;
-  tracks: TrackModel[];
+  tracks: Song[];
   fetchMore: () => void;
+  searched: boolean;
+};
+
+type State = {
+  trackId: string | null;
 };
 
 type Props = OwnProps;
 
-export class Results extends React.Component<Props> {
+export class Results extends React.Component<Props, State> {
+  constructor(props: any) {
+    super(props);
+
+    this.state = {
+      trackId: null
+    };
+  }
+
+  goToTrack = (e: React.SyntheticEvent<HTMLDivElement>) => {
+    const trackId = e.currentTarget.id;
+
+    this.setState({
+      trackId
+    });
+  };
+
   render() {
     const {
       tracks,
@@ -35,8 +57,16 @@ export class Results extends React.Component<Props> {
       enteredSearchTerm,
       isLoading,
       fetchMore,
-      moreResultsLoading
+      moreResultsLoading,
+      searched
     } = this.props;
+
+    const { trackId } = this.state;
+
+    if (trackId) {
+      const redirectUrl = "/track/" + trackId;
+      return <Redirect push to={redirectUrl} />;
+    }
 
     let content;
 
@@ -57,13 +87,13 @@ export class Results extends React.Component<Props> {
 
     if (isLoading) {
       content = loadingComponent;
-    } else if (enteredSearchTerm === "" || !/\S/.test(enteredSearchTerm)) {
+    } else if (!searched && totalResults === 0) {
       content = (
         <div className="mainHeader">
           <Resource resourceKey="doASearch" />
         </div>
       );
-    } else if (totalResults === "0") {
+    } else if (searched && totalResults === 0) {
       content = (
         <div className="mainHeader">
           <Resource resourceKey="noResults" />
@@ -73,7 +103,12 @@ export class Results extends React.Component<Props> {
       content = (
         <>
           <div className="mainHeader">
-            <Resource resourceKey="searchResults" /> "{enteredSearchTerm}"
+            {enteredSearchTerm !== "" && (
+              <>
+                <Resource resourceKey="searchResults" /> "{enteredSearchTerm}"
+              </>
+            )}
+
             <span className="totalResults">
               {totalResults} <Resource resourceKey="tracks" />
             </span>
@@ -83,23 +118,28 @@ export class Results extends React.Component<Props> {
             </StyledExportToCsvButton>
           </div>
           <div id="tracks">
-            {tracks.map((track, index) => (
-              <div key={track.id + "-id:" + index} className="track row">
+            {tracks.map(track => (
+              <div
+                key={track.id}
+                id={track.id.toString()}
+                className="track row"
+                onClick={this.goToTrack}
+              >
                 <div className="col-2 trackImage">
-                  <img src={track.imageSrc} alt="Album" />
+                  <img src={track.image_src} alt="Album" />
                 </div>
                 <div className="col-10 allTrackDetails">
                   <div className="interior">
                     <div>
                       <span className="trackName">{track.title}</span>
-                      <span className="trackLength">{track.length}</span>
+                      <span className="trackLength">{track.duration}</span>
                     </div>
                     <div className="bottomSection">
                       <span className="trackGenre">{track.genre}</span>
                       <span className="trackDetails">
                         {track.artist}
                         <img src={DotLogo} alt="dot" />
-                        {track.albumName}
+                        {track.album}
                       </span>
                     </div>
                   </div>
@@ -132,16 +172,6 @@ const StyledResults = styled.div`
       padding-right: 7px;
       margin-bottom: 3px;
     }
-  }
-
-  .loading {
-    margin: auto;
-    padding: 10px;
-  }
-
-  .loadingText {
-    font-size: 20px;
-    font-weight: bold;
   }
 
   .totalResults {
