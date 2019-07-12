@@ -45,5 +45,6 @@ export const fr: any = {
   filterGenres: "Filtrer des genres",
   filterPrimitives: "Filtrer des primitives",
   selectAll: "Tout sélectionner",
-  deselectAll: "Tout déselectionner"
+  deselectAll: "Effacer",
+  pageLoading: "Chargement de la page"
 };

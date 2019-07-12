@@ -40,6 +40,7 @@ export class Filter extends React.PureComponent {
         <AppContext.Consumer>
           {context => (
             <FilterSelection
+              id="genresFilter"
               headerResourceKey="genres"
               showFilterAtStart={true}
               borderTop={true}

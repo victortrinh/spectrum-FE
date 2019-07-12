@@ -13,6 +13,7 @@ import { AdminApp } from "admin-page/AdminPage";
 import { NeedPermissionApp } from "need-permission-page/NeedPermissionApp";
 import { GenresAPI } from "common/api/genres";
 import { PrimitivesAPI } from "common/api/primitives";
+import { TrackApp } from "track-page/TrackApp";
 
 type State = {
   loggedIn: boolean;
@@ -130,8 +131,9 @@ export default class App extends React.Component<{}, State> {
             )}
           />
           <Route path="/needPermission" component={NeedPermissionApp} />
+          <Route path="/track/:id" component={TrackApp} />
           <PrivateRoute path="/admin" component={AdminApp} />
-          <Route path="/createUser" component={CreateUserApp} />
+          <PrivateRoute path="/createUser" component={CreateUserApp} />
         </Router>
         <GlobalStyle />
       </AppContext.Provider>

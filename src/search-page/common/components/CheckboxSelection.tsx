@@ -37,7 +37,7 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
     };
   }
 
-  componentDidUpdate() {
+  componentDidMount() {
     if (!this.props.select) {
       this.selectAll();
     }

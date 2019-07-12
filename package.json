@@ -16,6 +16,7 @@
     "@types/styled-components": "^4.1.15",
     "axios": "^0.18.0",
     "bootstrap": "^4.3.1",
+    "font-awesome": "^4.7.0",
     "formsy-react": "^1.1.5",
     "immutable": "^4.0.0-rc.12",
     "polished": "^3.4.0",

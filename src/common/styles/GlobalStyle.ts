@@ -1,6 +1,6 @@
 import { createGlobalStyle } from "styled-components";
 import { fontSansSerif } from "./fonts";
-import { white, red } from './colors';
+import { white, red } from "./colors";
 
 export const GlobalStyle = createGlobalStyle`
   *,
@@ -62,5 +62,14 @@ export const GlobalStyle = createGlobalStyle`
 
   .clickable {
     cursor: pointer;
+  }
+
+  .loading {
+    margin: auto;
+  }
+
+  .loadingText {
+    font-size: 20px;
+    font-weight: bold;
   }
 `;
