@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import ExportLogo from "common/images/export.svg";
 import DotLogo from "common/images/dot.svg";
+import PlayButton from "common/images/Play.png";
 import ReactLoading from "react-loading";
 import BottomScrollListener from "react-bottom-scroll-listener";
 import { Resource } from "common/components/Resource";
@@ -16,6 +17,7 @@ import {
 import { StyledButton } from "common/components/Button.styles";
 import { Song } from "common/api/songs";
 import { Redirect } from "react-router";
+import AppContext from "AppContext";
 
 type OwnProps = {
   isLoading: boolean;
@@ -125,9 +127,22 @@ export class Results extends React.Component<Props, State> {
                 className="track row"
                 onClick={this.goToTrack}
               >
-                <div className="col-2 trackImage">
-                  <img src={track.image_src} alt="Album" />
-                </div>
+                <AppContext.Consumer>
+                  {context => (
+                    <div
+                      className="col-2 trackImage"
+                      data-track={track}
+                      onClick={context.setPlayedTrack(track)}
+                    >
+                      <img
+                        className="albumImage"
+                        src={track.image_src}
+                        alt="Album"
+                      />
+                      <img className="playButton" src={PlayButton} alt="Play" />
+                    </div>
+                  )}
+                </AppContext.Consumer>
                 <div className="col-10 allTrackDetails">
                   <div className="interior">
                     <div>
@@ -190,16 +205,38 @@ const StyledResults = styled.div`
       padding: 10px 0;
 
       .trackImage {
-        img {
+        position: relative;
+
+        .albumImage {
           height: 80px;
           width: 80px;
         }
 
+        .playButton {
+          position: absolute;
+          display: none;
+          top: 30%;
+          left: 40px;
+          z-index: 100;
+        }
+
         @media only screen and (max-width: 767px) {
-          img {
+          .albumImage {
             height: 60px;
             width: 60px;
           }
+
+          .playButton {
+            left: 30px;
+          }
+        }
+      }
+
+      .trackImage:hover {
+        cursor: pointer;
+
+        .playButton {
+          display: block;
         }
       }
 

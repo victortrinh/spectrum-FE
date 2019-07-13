@@ -14,12 +14,20 @@ import { NeedPermissionApp } from "need-permission-page/NeedPermissionApp";
 import { GenresAPI } from "common/api/genres";
 import { PrimitivesAPI } from "common/api/primitives";
 import { TrackApp } from "track-page/TrackApp";
+import { SongsAPI, Song } from "common/api/songs";
+import { millisToMinutesAndSeconds } from "common/api/utilities";
 
 type State = {
   loggedIn: boolean;
   language: string;
+  playedTrack: Song | null;
   genres: CheckboxModel[];
   primitives: CheckboxModel[];
+  tracksDB: Song[];
+  areTracksLoading: boolean;
+  setPlayedTrack: (
+    playedTrack: Song
+  ) => (e: React.SyntheticEvent<HTMLDivElement>) => void;
   setLanguage: (language: string) => void;
   getResource: (resourceKey: string) => string;
 };
@@ -27,6 +35,7 @@ type State = {
 export default class App extends React.Component<{}, State> {
   genresAPI: GenresAPI = new GenresAPI();
   primitivesAPI: PrimitivesAPI = new PrimitivesAPI();
+  songsApi: SongsAPI = new SongsAPI();
 
   constructor(props: any) {
     super(props);
@@ -41,9 +50,13 @@ export default class App extends React.Component<{}, State> {
 
     this.state = {
       language,
+      playedTrack: null,
       genres: [],
       primitives: [],
+      tracksDB: [],
       loggedIn,
+      areTracksLoading: true,
+      setPlayedTrack: this.setPlayedTrack,
       setLanguage: this.setLanguage,
       getResource: this.getResource
     };
@@ -78,11 +91,38 @@ export default class App extends React.Component<{}, State> {
       return 0;
     });
 
+    const tracksDB = await this.songsApi.getSongs().then(data =>
+      data.data.songs.map(
+        (song: Song) =>
+          ({
+            ...song,
+            image_src:
+              "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
+            duration: millisToMinutesAndSeconds(Number(song.primitives[0][1])),
+            album: "TODO ADD ALBUM",
+            preview_url:
+              "https://p.scdn.co/mp3-preview/229bb6a4c7011158cc7e1aff11957e274dc05e84?cid=774b29d4f13844c495f206cafdad9c86"
+          } as Song)
+      )
+    );
+
     this.setState({
       genres,
-      primitives
+      primitives,
+      tracksDB,
+      areTracksLoading: false
     });
   }
+
+  setPlayedTrack = (playedTrack: Song) => (
+    e: React.SyntheticEvent<HTMLDivElement>
+  ) => {
+    e.stopPropagation();
+
+    this.setState({
+      playedTrack
+    });
+  };
 
   setLanguage = (language: string) => {
     this.setState(
@@ -123,7 +163,7 @@ export default class App extends React.Component<{}, State> {
             language={language}
             setLanguage={this.setLanguage}
           />
-          <Route exact path="/" component={SearchApp} />
+          <Route exact path="/" render={() => <SearchApp {...this.state} />} />
           <Route
             path="/login"
             render={() => (
