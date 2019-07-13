@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import ExportLogo from "common/images/export.svg";
 import GraphPic from "common/images/graph_demo.png";
+import ReactAudioPlayer from "react-audio-player";
 import { Song, SongsAPI } from "common/api/songs";
 import { millisToMinutesAndSeconds } from "common/api/utilities";
 import { Loading } from "common/components/Loading";
@@ -119,6 +120,7 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
               <div className="float-right genre">{track.genre}</div>
             </div>
             <div className="album">{track.album}</div>
+            <ReactAudioPlayer src={track.preview_url} controls />
           </div>
         </div>
         <div className="primitivesContainer row mr-0 ml-0">
@@ -139,6 +141,7 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
                   .filter((x: any) => selectedPrimitives.includes(x[0]))
                   .map((primitive: any) => (
                     <tr
+                      key={primitive[0]}
                       className="clickable primitiveRow"
                       id={primitive[0]}
                       onClick={this.selectPrimitive}
@@ -191,6 +194,16 @@ const StyledTrackApp = styled.div`
     margin-left: 0;
     margin-right: 0;
     background-color: ${lightGray};
+
+    audio {
+      width: 100%;
+    }
+
+    audio::-webkit-media-controls-panel {
+      border-radius: 0;
+      padding: 0;
+      margin: 0;
+    }
 
     .exportButtonContainer {
       height: 32px;

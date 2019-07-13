@@ -12,11 +12,10 @@ import { Results } from "./Results";
 import { SongsAPI, Song } from "common/api/songs";
 import { CheckboxModel } from "./common/models/checkboxModel";
 import { Loading } from "common/components/Loading";
-import { millisToMinutesAndSeconds } from "common/api/utilities";
+import { AudioPlayer } from './AudioPlayer';
 
 type State = {
   page: number;
-  isFirstTimeLoading: boolean;
   isLoading: boolean;
   moreResultsLoading: boolean;
   totalResults: number;
@@ -24,11 +23,15 @@ type State = {
   enteredSearchTerm: string;
   allFilteredTracks: Song[];
   tracks: Song[];
-  tracksDB: Song[];
   searched: boolean;
 };
 
-export class SearchApp extends React.PureComponent<{}, State> {
+type Props = {
+  tracksDB: Song[];
+  areTracksLoading: boolean;
+};
+
+export class SearchApp extends React.PureComponent<Props, State> {
   private searchInputRef = createRef<HTMLInputElement>();
   private filterComponent = createRef<HTMLDivElement>();
   songsApi: SongsAPI = new SongsAPI();
@@ -38,7 +41,6 @@ export class SearchApp extends React.PureComponent<{}, State> {
 
     this.state = {
       page: 0,
-      isFirstTimeLoading: true,
       isLoading: false,
       moreResultsLoading: false,
       totalResults: 0,
@@ -46,32 +48,8 @@ export class SearchApp extends React.PureComponent<{}, State> {
       enteredSearchTerm: "",
       allFilteredTracks: [],
       tracks: [],
-      tracksDB: [],
       searched: false
     };
-  }
-
-  async componentDidMount() {
-    // TODO: Insert image, album
-    const tracksDB = await this.songsApi.getSongs().then(data =>
-      data.data.songs.map(
-        (song: Song) =>
-          ({
-            ...song,
-            image_src:
-              "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
-            duration: millisToMinutesAndSeconds(Number(song.primitives[0][1])),
-            album: "TODO ADD ALBUM",
-            preview_url:
-              "https://p.scdn.co/mp3-preview/229bb6a4c7011158cc7e1aff11957e274dc05e84?cid=774b29d4f13844c495f206cafdad9c86"
-          } as Song)
-      )
-    );
-
-    this.setState({
-      tracksDB,
-      isFirstTimeLoading: false
-    });
   }
 
   onKeyPress = (e: any) => {
@@ -114,7 +92,7 @@ export class SearchApp extends React.PureComponent<{}, State> {
 
         genresSelected = allGenres.filter(x => x.is_selected).map(x => x.name);
 
-        const filteredResults = this.state.tracksDB.filter(
+        const filteredResults = this.props.tracksDB.filter(
           x =>
             (x.title.toLowerCase().includes(searchTerm) ||
               x.artist.toLowerCase().includes(searchTerm) ||
@@ -144,9 +122,9 @@ export class SearchApp extends React.PureComponent<{}, State> {
   };
 
   render() {
-    const { isFirstTimeLoading } = this.state;
+    const { areTracksLoading } = this.props;
 
-    if (isFirstTimeLoading) {
+    if (areTracksLoading) {
       return <Loading />;
     }
 
@@ -192,6 +170,7 @@ export class SearchApp extends React.PureComponent<{}, State> {
             </div>
           </div>
         </div>
+        <AudioPlayer />
       </StyledSearchApp>
     );
   }
