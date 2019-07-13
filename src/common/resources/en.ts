@@ -20,6 +20,7 @@ export const en: any = {
   tracks: "tracks",
   doASearch: "Start searching to see some results",
   noResults: "No results",
+  loading: "Loading",
   contentLoading: "Results loading",
   mustBeEmail: "This is not an e-mail format",
   loginButton: "Login",
@@ -31,6 +32,7 @@ export const en: any = {
     "You are not logged in or you do not have permission to access this page",
   adminPage: "Admin page",
   createUser: "Create an admin",
+  addSongs: "Add songs",
   users: "Users",
   create: "Create",
   alphanumeric: "Must be alphanumeric",
@@ -38,5 +40,13 @@ export const en: any = {
   eightCharacters: "Must have at least 8 characters",
   maximumDbStorage: "Maximum database storage",
   currentDatabaseDistribution: "Current database distribution",
-  availableOf: "available of"
+  activatedFilters: "Activated filters",
+  availableOf: "available of",
+  filterGenres: "Filter genres",
+  filterPrimitives: "Filter primitives",
+  selectAll: "Select all",
+  deselectAll: "Clear",
+  pageLoading: "Page is loading",
+  primitive: "Primitive",
+  value: "Value"
 };

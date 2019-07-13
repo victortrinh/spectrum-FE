@@ -9,34 +9,46 @@ import { StyledButton } from "../common/components/Button.styles";
 import { Resource } from "common/components/Resource";
 import { Filter } from "./Filter";
 import { Results } from "./Results";
-import { TrackModel } from "./common/models/trackModel";
-import { LastFmAPI } from "common/api/lastfm";
+import { SongsAPI, Song } from "common/api/songs";
+import { CheckboxModel } from "./common/models/checkboxModel";
+import { Loading } from "common/components/Loading";
+import { AudioPlayer } from './AudioPlayer';
 
 type State = {
   page: number;
   isLoading: boolean;
   moreResultsLoading: boolean;
-  totalResults: string;
+  totalResults: number;
   searchTerm: string;
   enteredSearchTerm: string;
-  tracks: TrackModel[];
+  allFilteredTracks: Song[];
+  tracks: Song[];
+  searched: boolean;
 };
 
-export class SearchApp extends React.PureComponent<{}, State> {
+type Props = {
+  tracksDB: Song[];
+  areTracksLoading: boolean;
+};
+
+export class SearchApp extends React.PureComponent<Props, State> {
   private searchInputRef = createRef<HTMLInputElement>();
-  lastFmApi: LastFmAPI = new LastFmAPI();
+  private filterComponent = createRef<HTMLDivElement>();
+  songsApi: SongsAPI = new SongsAPI();
 
   constructor(props: any) {
     super(props);
 
     this.state = {
-      page: 1,
+      page: 0,
       isLoading: false,
       moreResultsLoading: false,
-      totalResults: "0",
+      totalResults: 0,
       searchTerm: "",
       enteredSearchTerm: "",
-      tracks: []
+      allFilteredTracks: [],
+      tracks: [],
+      searched: false
     };
   }
 
@@ -55,74 +67,67 @@ export class SearchApp extends React.PureComponent<{}, State> {
   };
 
   onSearch = async () => {
-    const searchTerm = this.state.searchTerm;
-
-    if (searchTerm !== "" || /\S/.test(searchTerm)) {
-      this.setState({
-        isLoading: true
-      });
-
-      const results = await this.lastFmApi.getTracks(searchTerm);
-
-      const tracks = results.results.trackmatches.track;
-
-      await this.lastFmApi.setTrackInfo(tracks);
-
-      this.setState({
-        isLoading: false,
-        enteredSearchTerm: searchTerm,
-        totalResults: results.results["opensearch:totalResults"],
-        tracks: tracks.map((track: any) => ({
-          id: track.mbid,
-          title: track.name,
-          length: track.length,
-          genre: track.genre,
-          albumName: track.album,
-          artist: track.artist,
-          imageSrc: track.imageSrc,
-          url: track.url
-        }))
-      });
-    }
-  };
-
-  fetchMore = () => {
     this.setState(
-      prevState => ({
-        page: prevState.page + 1,
-        moreResultsLoading: true
-      }),
-      async () => {
-        const results = await this.lastFmApi.getTracks(
-          this.state.searchTerm,
-          this.state.page
+      {
+        isLoading: true
+      },
+      () => {
+        const searchTerm = this.state.searchTerm.toLowerCase();
+
+        let allGenres: CheckboxModel[] = [];
+        let genresSelected: string[] = [];
+
+        if (this.filterComponent.current) {
+          const allGenreInputs = this.filterComponent.current
+            .querySelectorAll("#genresFilter")[0]
+            .querySelectorAll<HTMLInputElement>("input[type='checkbox']");
+
+          allGenreInputs.forEach((x: any) =>
+            allGenres.push({
+              is_selected: x.checked,
+              name: x.labels[0].innerHTML
+            } as CheckboxModel)
+          );
+        }
+
+        genresSelected = allGenres.filter(x => x.is_selected).map(x => x.name);
+
+        const filteredResults = this.props.tracksDB.filter(
+          x =>
+            (x.title.toLowerCase().includes(searchTerm) ||
+              x.artist.toLowerCase().includes(searchTerm) ||
+              x.album.toLowerCase().includes(searchTerm)) &&
+            genresSelected.includes(x.genre)
         );
 
-        const tracks = results.results.trackmatches.track;
-
-        await this.lastFmApi.setTrackInfo(tracks);
-
-        this.setState(prevState => ({
-          ...prevState,
-          moreResultsLoading: false,
-          tracks: prevState.tracks.concat(
-            tracks.map((track: any) => ({
-              id: track.mbid,
-              title: track.name,
-              length: track.length,
-              genre: track.genre,
-              albumName: track.album,
-              artist: track.artist,
-              imageSrc: track.imageSrc,
-              url: track.url
-            }))
-          )
-        }));
+        this.setState({
+          page: 1,
+          isLoading: false,
+          enteredSearchTerm: this.state.searchTerm,
+          totalResults: filteredResults.length,
+          allFilteredTracks: filteredResults,
+          tracks: filteredResults.slice(0, 15),
+          searched: true
+        });
       }
     );
   };
 
+  fetchMore = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      page: prevState.page + 1,
+      tracks: prevState.allFilteredTracks.slice(0, 15 * (prevState.page + 1))
+    }));
+  };
+
   render() {
+    const { areTracksLoading } = this.props;
+
+    if (areTracksLoading) {
+      return <Loading />;
+    }
+
     return (
       <StyledSearchApp>
         <div className="jumbotron jumbotron-fluid">
@@ -157,7 +162,7 @@ export class SearchApp extends React.PureComponent<{}, State> {
         </div>
         <div className="results container">
           <div className="row">
-            <div className="col-md-12 col-lg-3">
+            <div className="col-md-12 col-lg-3" ref={this.filterComponent}>
               <Filter />
             </div>
             <div className="col-md-12 col-lg-9">
@@ -165,6 +170,7 @@ export class SearchApp extends React.PureComponent<{}, State> {
             </div>
           </div>
         </div>
+        <AudioPlayer />
       </StyledSearchApp>
     );
   }

@@ -6,7 +6,6 @@ import { FilterSelection } from "search-page/common/components/FilterSelection";
 import { CheckboxSelection } from "./common/components/CheckboxSelection";
 import { StyledInput } from "common/components/Form.styles";
 import { StyledButton } from "common/components/Button.styles";
-import { YearsSelector } from "./common/components/YearsSelector";
 
 export class Filter extends React.PureComponent {
   onChangeCheckboxGenre = (e: React.SyntheticEvent<HTMLInputElement>) => {
@@ -41,13 +40,16 @@ export class Filter extends React.PureComponent {
         <AppContext.Consumer>
           {context => (
             <FilterSelection
+              id="genresFilter"
               headerResourceKey="genres"
-              showFilterAtStart={false}
+              showFilterAtStart={true}
               borderTop={true}
             >
               <CheckboxSelection
-                checkboxes={context.genres.filter(genre => genre.selected)}
+                checkboxes={context.genres.filter(genre => genre.is_selected)}
                 onChange={this.onChangeCheckboxGenre}
+                selectAll={true}
+                showAllAtStart={true}
               />
             </FilterSelection>
           )}
@@ -56,30 +58,21 @@ export class Filter extends React.PureComponent {
           {context => (
             <FilterSelection
               headerResourceKey="primitives"
-              showFilterAtStart={false}
+              showFilterAtStart={true}
               borderTop={true}
+              borderBottom={true}
             >
               <CheckboxSelection
                 checkboxes={context.primitives.filter(
-                  primitive => primitive.selected
+                  primitive => primitive.is_selected
                 )}
                 onChange={this.onChangeCheckboxPrimitive}
+                showAllAtStart={true}
+                selectAll={true}
               />
             </FilterSelection>
           )}
         </AppContext.Consumer>
-        <FilterSelection
-          headerResourceKey="years"
-          showFilterAtStart={false}
-          borderTop={true}
-          borderBottom={true}
-        >
-          <YearsSelector defaultValue="1900" />
-          <span className="betweenInputs">
-            <Resource resourceKey="to" />
-          </span>
-          <YearsSelector defaultValue="2019" />
-        </FilterSelection>
       </StyledFilter>
     );
   }

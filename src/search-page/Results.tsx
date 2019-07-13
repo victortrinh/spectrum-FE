@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import ExportLogo from "common/images/export.svg";
 import DotLogo from "common/images/dot.svg";
+import PlayButton from "common/images/Play.png";
 import ReactLoading from "react-loading";
 import BottomScrollListener from "react-bottom-scroll-listener";
 import { Resource } from "common/components/Resource";
@@ -14,20 +15,43 @@ import {
   black
 } from "common/styles/colors";
 import { StyledButton } from "common/components/Button.styles";
-import { TrackModel } from "./common/models/trackModel";
+import { Song } from "common/api/songs";
+import { Redirect } from "react-router";
+import AppContext from "AppContext";
 
 type OwnProps = {
   isLoading: boolean;
   moreResultsLoading: boolean;
-  totalResults: string;
+  totalResults: number;
   enteredSearchTerm: string;
-  tracks: TrackModel[];
+  tracks: Song[];
   fetchMore: () => void;
+  searched: boolean;
+};
+
+type State = {
+  trackId: string | null;
 };
 
 type Props = OwnProps;
 
-export class Results extends React.Component<Props> {
+export class Results extends React.Component<Props, State> {
+  constructor(props: any) {
+    super(props);
+
+    this.state = {
+      trackId: null
+    };
+  }
+
+  goToTrack = (e: React.SyntheticEvent<HTMLDivElement>) => {
+    const trackId = e.currentTarget.id;
+
+    this.setState({
+      trackId
+    });
+  };
+
   render() {
     const {
       tracks,
@@ -35,8 +59,16 @@ export class Results extends React.Component<Props> {
       enteredSearchTerm,
       isLoading,
       fetchMore,
-      moreResultsLoading
+      moreResultsLoading,
+      searched
     } = this.props;
+
+    const { trackId } = this.state;
+
+    if (trackId) {
+      const redirectUrl = "/track/" + trackId;
+      return <Redirect push to={redirectUrl} />;
+    }
 
     let content;
 
@@ -57,13 +89,13 @@ export class Results extends React.Component<Props> {
 
     if (isLoading) {
       content = loadingComponent;
-    } else if (enteredSearchTerm === "" || !/\S/.test(enteredSearchTerm)) {
+    } else if (!searched && totalResults === 0) {
       content = (
         <div className="mainHeader">
           <Resource resourceKey="doASearch" />
         </div>
       );
-    } else if (totalResults === "0") {
+    } else if (searched && totalResults === 0) {
       content = (
         <div className="mainHeader">
           <Resource resourceKey="noResults" />
@@ -73,7 +105,12 @@ export class Results extends React.Component<Props> {
       content = (
         <>
           <div className="mainHeader">
-            <Resource resourceKey="searchResults" /> "{enteredSearchTerm}"
+            {enteredSearchTerm !== "" && (
+              <>
+                <Resource resourceKey="searchResults" /> "{enteredSearchTerm}"
+              </>
+            )}
+
             <span className="totalResults">
               {totalResults} <Resource resourceKey="tracks" />
             </span>
@@ -83,23 +120,41 @@ export class Results extends React.Component<Props> {
             </StyledExportToCsvButton>
           </div>
           <div id="tracks">
-            {tracks.map((track, index) => (
-              <div key={track.id + "-id:" + index} className="track row">
-                <div className="col-2 trackImage">
-                  <img src={track.imageSrc} alt="Album" />
-                </div>
+            {tracks.map(track => (
+              <div
+                key={track.id}
+                id={track.id.toString()}
+                className="track row"
+                onClick={this.goToTrack}
+              >
+                <AppContext.Consumer>
+                  {context => (
+                    <div
+                      className="col-2 trackImage"
+                      data-track={track}
+                      onClick={context.setPlayedTrack(track)}
+                    >
+                      <img
+                        className="albumImage"
+                        src={track.image_src}
+                        alt="Album"
+                      />
+                      <img className="playButton" src={PlayButton} alt="Play" />
+                    </div>
+                  )}
+                </AppContext.Consumer>
                 <div className="col-10 allTrackDetails">
                   <div className="interior">
                     <div>
                       <span className="trackName">{track.title}</span>
-                      <span className="trackLength">{track.length}</span>
+                      <span className="trackLength">{track.duration}</span>
                     </div>
                     <div className="bottomSection">
                       <span className="trackGenre">{track.genre}</span>
                       <span className="trackDetails">
                         {track.artist}
                         <img src={DotLogo} alt="dot" />
-                        {track.albumName}
+                        {track.album}
                       </span>
                     </div>
                   </div>
@@ -134,16 +189,6 @@ const StyledResults = styled.div`
     }
   }
 
-  .loading {
-    margin: auto;
-    padding: 10px;
-  }
-
-  .loadingText {
-    font-size: 20px;
-    font-weight: bold;
-  }
-
   .totalResults {
     padding-left: 5px;
     color: ${darkGray};
@@ -160,16 +205,38 @@ const StyledResults = styled.div`
       padding: 10px 0;
 
       .trackImage {
-        img {
+        position: relative;
+
+        .albumImage {
           height: 80px;
           width: 80px;
         }
 
+        .playButton {
+          position: absolute;
+          display: none;
+          top: 30%;
+          left: 40px;
+          z-index: 100;
+        }
+
         @media only screen and (max-width: 767px) {
-          img {
+          .albumImage {
             height: 60px;
             width: 60px;
           }
+
+          .playButton {
+            left: 30px;
+          }
+        }
+      }
+
+      .trackImage:hover {
+        cursor: pointer;
+
+        .playButton {
+          display: block;
         }
       }
 

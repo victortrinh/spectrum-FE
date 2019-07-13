@@ -8,24 +8,35 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import { SearchApp } from "./search-page/SearchApp";
 import { AppNavBar } from "./common/components/AppNavBar";
 import { CreateUserApp } from "create-user-page/CreateUserApp";
-import {
-  CheckboxModel,
-  genres,
-  primitives
-} from "search-page/common/models/checkboxModel";
+import { CheckboxModel } from "search-page/common/models/checkboxModel";
 import { AdminApp } from "admin-page/AdminPage";
-import { NeedPermissionApp } from 'need-permission-page/NeedPermissionApp';
+import { NeedPermissionApp } from "need-permission-page/NeedPermissionApp";
+import { GenresAPI } from "common/api/genres";
+import { PrimitivesAPI } from "common/api/primitives";
+import { TrackApp } from "track-page/TrackApp";
+import { SongsAPI, Song } from "common/api/songs";
+import { millisToMinutesAndSeconds } from "common/api/utilities";
 
 type State = {
   loggedIn: boolean;
   language: string;
+  playedTrack: Song | null;
   genres: CheckboxModel[];
   primitives: CheckboxModel[];
+  tracksDB: Song[];
+  areTracksLoading: boolean;
+  setPlayedTrack: (
+    playedTrack: Song
+  ) => (e: React.SyntheticEvent<HTMLDivElement>) => void;
   setLanguage: (language: string) => void;
   getResource: (resourceKey: string) => string;
 };
 
 export default class App extends React.Component<{}, State> {
+  genresAPI: GenresAPI = new GenresAPI();
+  primitivesAPI: PrimitivesAPI = new PrimitivesAPI();
+  songsApi: SongsAPI = new SongsAPI();
+
   constructor(props: any) {
     super(props);
 
@@ -39,22 +50,79 @@ export default class App extends React.Component<{}, State> {
 
     this.state = {
       language,
+      playedTrack: null,
       genres: [],
       primitives: [],
+      tracksDB: [],
       loggedIn,
+      areTracksLoading: true,
+      setPlayedTrack: this.setPlayedTrack,
       setLanguage: this.setLanguage,
       getResource: this.getResource
     };
   }
 
-  componentDidMount() {
-    // TODO: Use api to get primitives and genres
+  async componentDidMount() {
+    const genres = await this.genresAPI
+      .getGenres()
+      .then(data => data.data.genres);
+
+    genres.sort((a: CheckboxModel, b: CheckboxModel) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+
+    const primitives = await this.primitivesAPI
+      .getPrimitives()
+      .then(data => data.data.primitives);
+
+    primitives.sort((a: CheckboxModel, b: CheckboxModel) => {
+      if (a.name < b.name) {
+        return -1;
+      }
+      if (a.name > b.name) {
+        return 1;
+      }
+      return 0;
+    });
+
+    const tracksDB = await this.songsApi.getSongs().then(data =>
+      data.data.songs.map(
+        (song: Song) =>
+          ({
+            ...song,
+            image_src:
+              "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
+            duration: millisToMinutesAndSeconds(Number(song.primitives[0][1])),
+            album: "TODO ADD ALBUM",
+            preview_url:
+              "https://p.scdn.co/mp3-preview/229bb6a4c7011158cc7e1aff11957e274dc05e84?cid=774b29d4f13844c495f206cafdad9c86"
+          } as Song)
+      )
+    );
 
     this.setState({
       genres,
-      primitives
+      primitives,
+      tracksDB,
+      areTracksLoading: false
     });
   }
+
+  setPlayedTrack = (playedTrack: Song) => (
+    e: React.SyntheticEvent<HTMLDivElement>
+  ) => {
+    e.stopPropagation();
+
+    this.setState({
+      playedTrack
+    });
+  };
 
   setLanguage = (language: string) => {
     this.setState(
@@ -95,7 +163,7 @@ export default class App extends React.Component<{}, State> {
             language={language}
             setLanguage={this.setLanguage}
           />
-          <Route exact path="/" component={SearchApp} />
+          <Route exact path="/" render={() => <SearchApp {...this.state} />} />
           <Route
             path="/login"
             render={() => (
@@ -103,8 +171,9 @@ export default class App extends React.Component<{}, State> {
             )}
           />
           <Route path="/needPermission" component={NeedPermissionApp} />
-          <PrivateRoute path='/admin' component={AdminApp} />
-          <PrivateRoute path='/createUser' component={CreateUserApp} />
+          <Route path="/track/:id" component={TrackApp} />
+          <PrivateRoute path="/admin" component={AdminApp} />
+          <PrivateRoute path="/createUser" component={CreateUserApp} />
         </Router>
         <GlobalStyle />
       </AppContext.Provider>

@@ -5,3 +5,4 @@ type OneOf<T, U> = (Without<T> & U) | (Without<U> & T);
 
 declare module 'formsy-react';
 declare module 'react-minimal-pie-chart';
+declare module 'react-audio-player';

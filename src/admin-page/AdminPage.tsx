@@ -2,56 +2,95 @@ import React from "react";
 import styled from "styled-components";
 import randomColor from "randomcolor";
 import PieChart from "react-minimal-pie-chart";
-import { lightGray, white, primaryColor, darkGray } from "common/styles/colors";
+import AppContext from "AppContext";
+import ReactLoading from "react-loading";
+import { lightGray, white, black } from "common/styles/colors";
 import { Resource } from "common/components/Resource";
 import { StyledButton } from "common/components/Button.styles";
 import { Redirect } from "react-router";
-import { Genres, GenreModel } from "./models/genreModel";
+import { GenreModel } from "./models/genreModel";
 import { Circle } from "common/images/Circle";
-import { StyledInput } from "common/components/Form.styles";
-import AppContext from "AppContext";
 import { FilterSelection } from "search-page/common/components/FilterSelection";
 import { CheckboxSelection } from "search-page/common/components/CheckboxSelection";
+import { GenresAPI } from "common/api/genres";
+import { PrimitivesAPI } from "common/api/primitives";
+import { CheckboxModel } from "search-page/common/models/checkboxModel";
 
 type State = {
   createUser: boolean;
+  addSongs: boolean;
   genres: GenreModel[];
-  totalDbSpace: number;
-  usedDbSpace: number;
-  temporaryDbSpace: number;
+  genresLoading: boolean;
 };
 
 export class AdminApp extends React.PureComponent<{}, State> {
+  genresAPI: GenresAPI = new GenresAPI();
+  primitivesAPI: PrimitivesAPI = new PrimitivesAPI();
+
   constructor(props: any) {
     super(props);
 
     this.state = {
       createUser: false,
+      addSongs: false,
       genres: [],
-      totalDbSpace: 500,
-      usedDbSpace: 324,
-      temporaryDbSpace: 500
+      genresLoading: true
     };
   }
 
-  componentDidMount = () => {
-    // TODO: To get genres from backend
+  async componentDidMount() {
+    await this.getGenreStats();
+  }
+
+  getGenreStats = async () => {
+    let genresStats = await this.genresAPI
+      .getStats()
+      .then(data => data.data.genres);
+
+    const genresDB = await this.genresAPI
+      .getGenres()
+      .then(data => data.data.genres);
+
+    let genres = genresStats.map((itm: GenreModel) => ({
+      ...genresDB.find((item: CheckboxModel) => item.id === itm.id && item),
+      ...itm
+    }));
+
+    genres = genres
+      .filter((x: any) => x.percentage !== 0 && x.is_selected)
+      .sort((a: any, b: any) => {
+        if (a.genre < b.genre) {
+          return -1;
+        }
+        if (a.genre > b.genre) {
+          return 1;
+        }
+        return 0;
+      });
+
     const colors = randomColor({
-      count: Genres().length
+      luminosity: "dark",
+      count: genres.length
     });
 
     this.setState({
-      genres: Genres().map((genre, index) => ({
-        name: genre.name,
-        percentage: genre.percentage,
+      genresLoading: false,
+      genres: genres.map((genre: GenreModel, index: number) => ({
+        ...genre,
         color: colors[index]
       }))
     });
-  };
+  }
 
   createUser = () => {
     this.setState({
       createUser: true
+    });
+  };
+
+  addSongs = () => {
+    this.setState({
+      addSongs: true
     });
   };
 
@@ -64,33 +103,46 @@ export class AdminApp extends React.PureComponent<{}, State> {
     } as any);
   };
 
-  onChangeCheckboxGenre = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    // TODO
+  onChangeCheckboxGenre = async (e: React.SyntheticEvent<HTMLInputElement>) => {
+    await this.genresAPI.updateGenre({
+      id: Number(e.currentTarget.id),
+      selected: e.currentTarget.checked
+    });
+
+    this.setState(
+      {
+        genresLoading: true
+      },
+      () => this.getGenreStats()
+    );
   };
 
   onChangeCheckboxPrimitive = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    // TODO
-  };
-
-  onBlur = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    const value = e.currentTarget.value;
-
-    this.setState({
-      totalDbSpace: Number(value)
+    this.primitivesAPI.updatePrimitive({
+      id: Number(e.currentTarget.id),
+      selected: e.currentTarget.checked
     });
   };
 
   render() {
-    const {
-      createUser,
-      genres,
-      totalDbSpace,
-      usedDbSpace,
-      temporaryDbSpace
-    } = this.state;
+    const { createUser, addSongs, genres, genresLoading } = this.state;
+
+    const loadingComponent = (
+      <ReactLoading
+        className="loading"
+        type="spinningBubbles"
+        color={black}
+        height={100}
+        width={100}
+      />
+    );
 
     if (createUser) {
       return <Redirect to="/createUser" />;
+    }
+
+    if (addSongs) {
+      return <Redirect to="/addSongs" />;
     }
 
     return (
@@ -107,93 +159,64 @@ export class AdminApp extends React.PureComponent<{}, State> {
             >
               <Resource resourceKey="createUser" />
             </StyledButton>
+            <StyledButton
+              className="float-right addSongsButton"
+              onClick={this.addSongs}
+              variant="secondary"
+            >
+              <Resource resourceKey="addSongs" />
+            </StyledButton>
           </div>
           <div className="row">
             <div className="col-xs-12 col-lg-7">
-              <div className="innerContainer">
-                <div className="innerContent">
-                  <div className="subHeader">
-                    <Resource resourceKey="maximumDbStorage" />
-                  </div>
-                  <div className="dbStorage">
-                    <span className="dbTotal">
-                      {usedDbSpace} GB <Resource resourceKey="availableOf" />{" "}
-                      {totalDbSpace} GB
-                    </span>
-                    <span className="float-right">
-                      <div>
-                        <span style={{ color: darkGray }}>Max:</span>
-                        <StyledInput
-                          value={temporaryDbSpace}
-                          name="temporaryDbSpace"
-                          onChange={this.onChange}
-                          onBlur={this.onBlur}
-                          style={{
-                            height: "30px",
-                            width: "75px",
-                            marginLeft: "8px",
-                            marginRight: "8px",
-                            marginBottom: "5px"
-                          }}
-                        />
-                        GB
-                      </div>
-                    </span>
-                  </div>
-                  <div className="progress">
-                    <div
-                      className="progress-bar"
-                      role="progressbar"
-                      style={
-                        {
-                          width:
-                            Math.trunc((usedDbSpace / totalDbSpace) * 100) + "%"
-                        } as any
-                      }
-                    />
-                  </div>
-                </div>
-              </div>
               <div className="distribution innerContainer">
                 <div className="innerContent">
                   <div className="subHeader">
                     <Resource resourceKey="currentDatabaseDistribution" />
                   </div>
                 </div>
-                <div className="row">
-                  <div className="col-xs-12 col-lg-6">
-                    <PieChart
-                      lineWidth={40}
-                      data={genres.map(genre => ({
-                        title: genre.name + " - " + genre.percentage + "%",
-                        value: genre.percentage,
-                        color: genre.color
-                      }))}
-                    />
+                {genresLoading ? (
+                  loadingComponent
+                ) : (
+                  <div className="row">
+                    <div className="col-xs-12 col-lg-6">
+                      <PieChart
+                        lineWidth={40}
+                        data={genres.map(genre => ({
+                          title:
+                            genre.genre.toUpperCase() +
+                            " - " +
+                            genre.percentage +
+                            "%",
+                          value: genre.percentage,
+                          color: genre.color
+                        }))}
+                      />
+                    </div>
+                    <div className="col-xs-12 col-lg-6 my-auto">
+                      <ul>
+                        {genres.map(genre => (
+                          <li key={genre.id}>
+                            <span className="circle">
+                              <Circle marginBottom="3px" color={genre.color} />
+                            </span>
+                            <span className="genreName">{genre.genre}</span>
+                            <span className="float-right">
+                              {genre.percentage}%
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
                   </div>
-                  <div className="col-xs-12 col-lg-6 my-auto">
-                    <ul>
-                      {genres.map(genre => (
-                        <li key={genre.name}>
-                          <span className="circle">
-                            <Circle marginBottom="3px" color={genre.color} />
-                          </span>
-                          <span className="genreName">{genre.name}</span>
-                          <span className="float-right">
-                            {genre.percentage}%
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
             <div className="genresContainer col-xs-12 col-lg-5">
               <div className="innerContainer">
                 <div className="innerContent">
                   <div className="subHeader" style={{ marginBottom: "0" }}>
-                    <Resource resourceKey="currentDatabaseDistribution" />
+                    <Resource resourceKey="activatedFilters" />
                   </div>
                   <AppContext.Consumer>
                     {context => (
@@ -207,6 +230,10 @@ export class AdminApp extends React.PureComponent<{}, State> {
                           checkboxes={context.genres}
                           select={true}
                           onChange={this.onChangeCheckboxGenre}
+                          filterable={true}
+                          placeholderForFilter={context.getResource(
+                            "filterGenres"
+                          )}
                         />
                       </FilterSelection>
                     )}
@@ -223,6 +250,10 @@ export class AdminApp extends React.PureComponent<{}, State> {
                           checkboxes={context.primitives}
                           select={true}
                           onChange={this.onChangeCheckboxPrimitive}
+                          filterable={true}
+                          placeholderForFilter={context.getResource(
+                            "filterPrimitives"
+                          )}
                         />
                       </FilterSelection>
                     )}
@@ -245,6 +276,10 @@ const StyledAdminApp = styled.div`
     padding-top: 30px;
   }
 
+  .addSongsButton {
+    margin-right: 15px;
+  }
+
   .title {
     font-size: 26px;
     font-weight: 500;
@@ -259,35 +294,9 @@ const StyledAdminApp = styled.div`
   .innerContent {
     margin-left: 15px;
     margin-right: 15px;
-
-    .progress {
-      height: 30px;
-      background-color: ${lightGray};
-
-      .progress-bar {
-        background-color: ${primaryColor};
-      }
-    }
-
-    .dbStorage {
-      margin-bottom: 10px;
-      height: 30px;
-
-      span {
-        display: inline-block;
-        vertical-align: middle;
-        line-height: normal;
-      }
-
-      .dbTotal {
-        font-weight: 500;
-      }
-    }
   }
 
   .distribution {
-    margin-top: 15px;
-
     .row {
       margin-right: 0;
       margin-left: 0;
@@ -315,6 +324,7 @@ const StyledAdminApp = styled.div`
 
     .genreName {
       font-size: 15px;
+      text-transform: uppercase;
     }
   }
 
