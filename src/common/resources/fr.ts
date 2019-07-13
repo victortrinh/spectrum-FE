@@ -46,5 +46,7 @@ export const fr: any = {
   filterPrimitives: "Filtrer des primitives",
   selectAll: "Tout sélectionner",
   deselectAll: "Effacer",
-  pageLoading: "Chargement de la page"
+  pageLoading: "Chargement de la page",
+  primitive: "Primitive",
+  value: "Valeur"
 };
