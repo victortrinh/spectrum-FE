@@ -22,6 +22,10 @@ export class SongsAPI {
     return this.perform("get", "/api/song/all");
   }
 
+  async getSong(trackId: string) {
+    return this.perform("get", "/api/song/" + trackId);
+  }
+
   async perform(method: any, resource: any, data: Song | null = null) {
     return client({
       method,
@@ -34,7 +38,9 @@ export class SongsAPI {
       error => {
         return {
           isError: true,
-          data: error.response ? error.response.data.message : "Error with back-end"
+          data: error.response
+            ? error.response.data.message
+            : "Error with back-end"
         };
       }
     );

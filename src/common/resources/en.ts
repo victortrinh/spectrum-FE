@@ -46,5 +46,7 @@ export const en: any = {
   filterPrimitives: "Filter primitives",
   selectAll: "Select all",
   deselectAll: "Clear",
-  pageLoading: "Page is loading"
+  pageLoading: "Page is loading",
+  primitive: "Primitive",
+  value: "Value"
 };

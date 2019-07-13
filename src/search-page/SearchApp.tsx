@@ -3,7 +3,6 @@ import styled from "styled-components";
 import JumbotronImage from "../common/images/jumbotron.png";
 import RadioLogo from "../common/images/radio.svg";
 import AppContext from "AppContext";
-import MissingImage from "../common/images/missingSong.png";
 import { white } from "../common/styles/colors";
 import { StyledInput } from "../common/components/Form.styles";
 import { StyledButton } from "../common/components/Button.styles";
@@ -13,6 +12,7 @@ import { Results } from "./Results";
 import { SongsAPI, Song } from "common/api/songs";
 import { CheckboxModel } from "./common/models/checkboxModel";
 import { Loading } from "common/components/Loading";
+import { millisToMinutesAndSeconds } from "common/api/utilities";
 
 type State = {
   page: number;
@@ -58,10 +58,9 @@ export class SearchApp extends React.PureComponent<{}, State> {
         (song: Song) =>
           ({
             ...song,
-            image_src: "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
-            duration: this.millisToMinutesAndSeconds(
-              Number(song.primitives[0][1])
-            ),
+            image_src:
+              "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
+            duration: millisToMinutesAndSeconds(Number(song.primitives[0][1])),
             album: "TODO ADD ALBUM",
             preview_url:
               "https://p.scdn.co/mp3-preview/229bb6a4c7011158cc7e1aff11957e274dc05e84?cid=774b29d4f13844c495f206cafdad9c86"
@@ -87,12 +86,6 @@ export class SearchApp extends React.PureComponent<{}, State> {
     this.setState({
       searchTerm
     });
-  };
-
-  millisToMinutesAndSeconds = (millis: number) => {
-    const minutes = Math.floor(millis / 60000);
-    const seconds = ((millis % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (Number(seconds) < 10 ? "0" : "") + seconds;
   };
 
   onSearch = async () => {
