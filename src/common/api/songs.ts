@@ -11,10 +11,10 @@ export type Song = {
   genre: string;
   title: string;
   duration: string;
-  image_src: string;
+  art: string;
   album: string;
   primitives: any;
-  preview_url: string;
+  sound: string | null;
 };
 
 export class SongsAPI {

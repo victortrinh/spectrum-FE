@@ -8,7 +8,10 @@ import { BrowserRouter as Router, Route, Redirect } from "react-router-dom";
 import { SearchApp } from "./search-page/SearchApp";
 import { AppNavBar } from "./common/components/AppNavBar";
 import { CreateUserApp } from "create-user-page/CreateUserApp";
-import { CheckboxModel } from "search-page/common/models/checkboxModel";
+import {
+  CheckboxModel,
+  PrimitiveCheckboxModel
+} from "search-page/common/models/checkboxModel";
 import { AdminApp } from "admin-page/AdminPage";
 import { NeedPermissionApp } from "need-permission-page/NeedPermissionApp";
 import { GenresAPI } from "common/api/genres";
@@ -22,9 +25,17 @@ type State = {
   language: string;
   playedTrack: Song | null;
   genres: CheckboxModel[];
-  primitives: CheckboxModel[];
+  primitives: PrimitiveCheckboxModel[];
   tracksDB: Song[];
   areTracksLoading: boolean;
+  unselectedPrimitiveIdList: number[];
+  unselectedGenreIdList: number[];
+  updateUnselectedGenreIdList: (id: number, checked: boolean) => void;
+  userUncheckAllPrimitives: () => void;
+  userCheckAllPrimitives: () => void;
+  userUncheckAllGenres: () => void;
+  userCheckAllGenres: () => void;
+  updateUnselectedPrimitiveIdList: (id: number, checked: boolean) => void;
   setPlayedTrack: (
     playedTrack: Song
   ) => (e: React.SyntheticEvent<HTMLDivElement>) => void;
@@ -55,6 +66,14 @@ export default class App extends React.Component<{}, State> {
       primitives: [],
       tracksDB: [],
       loggedIn,
+      unselectedPrimitiveIdList: [],
+      unselectedGenreIdList: [],
+      userUncheckAllPrimitives: this.userUncheckAllPrimitives,
+      userCheckAllPrimitives: this.userCheckAllPrimitives,
+      userUncheckAllGenres: this.userUncheckAllGenres,
+      userCheckAllGenres: this.userCheckAllGenres,
+      updateUnselectedGenreIdList: this.updateUnselectedGenreIdList,
+      updateUnselectedPrimitiveIdList: this.updateUnselectedPrimitiveIdList,
       areTracksLoading: true,
       setPlayedTrack: this.setPlayedTrack,
       setLanguage: this.setLanguage,
@@ -63,48 +82,58 @@ export default class App extends React.Component<{}, State> {
   }
 
   async componentDidMount() {
+    let tracksDB = JSON.parse(sessionStorage.getItem(
+      "tracksDB"
+    ) as string) as any;
+
     const genres = await this.genresAPI
       .getGenres()
       .then(data => data.data.genres);
 
-    genres.sort((a: CheckboxModel, b: CheckboxModel) => {
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    });
+    if (genres) {
+      genres.sort((a: CheckboxModel, b: CheckboxModel) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+    }
 
     const primitives = await this.primitivesAPI
       .getPrimitives()
       .then(data => data.data.primitives);
 
-    primitives.sort((a: CheckboxModel, b: CheckboxModel) => {
-      if (a.name < b.name) {
-        return -1;
-      }
-      if (a.name > b.name) {
-        return 1;
-      }
-      return 0;
-    });
+    if (primitives) {
+      primitives.sort(
+        (a: PrimitiveCheckboxModel, b: PrimitiveCheckboxModel) => {
+          if (a.name < b.name) {
+            return -1;
+          }
+          if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        }
+      );
+    }
 
-    const tracksDB = await this.songsApi.getSongs().then(data =>
-      data.data.songs.map(
-        (song: Song) =>
-          ({
-            ...song,
-            image_src:
-              "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
-            duration: millisToMinutesAndSeconds(Number(song.primitives[0][1])),
-            album: "TODO ADD ALBUM",
-            preview_url:
-              "https://p.scdn.co/mp3-preview/229bb6a4c7011158cc7e1aff11957e274dc05e84?cid=774b29d4f13844c495f206cafdad9c86"
-          } as Song)
-      )
-    );
+    if (!tracksDB) {
+      tracksDB = await this.songsApi.getSongs().then(data => {
+        debugger;
+        return data.data.songs.map(
+          (song: Song) =>
+            ({
+              ...song,
+              duration: millisToMinutesAndSeconds(Number(song.primitives[0][1]))
+            } as Song)
+        );
+      });
+
+      sessionStorage.setItem("tracksDB", JSON.stringify(tracksDB));
+    }
 
     this.setState({
       genres,
@@ -113,6 +142,70 @@ export default class App extends React.Component<{}, State> {
       areTracksLoading: false
     });
   }
+
+  userUncheckAllPrimitives = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      unselectedPrimitiveIdList: prevState.primitives
+        .filter(x => x.is_selected)
+        .map(x => x.id)
+    }));
+  };
+
+  userCheckAllPrimitives = () => {
+    this.setState({
+      unselectedPrimitiveIdList: []
+    });
+  };
+
+  userUncheckAllGenres = () => {
+    this.setState(prevState => ({
+      ...prevState,
+      unselectedGenreIdList: prevState.genres
+        .filter(x => x.is_selected)
+        .map(x => x.id)
+    }));
+  };
+
+  userCheckAllGenres = () => {
+    this.setState({
+      unselectedGenreIdList: []
+    });
+  };
+
+  updateUnselectedGenreIdList = (id: number, checked: boolean) => {
+    if (!checked) {
+      this.setState(prevState => ({
+        ...prevState,
+        unselectedGenreIdList: prevState.unselectedGenreIdList.concat(id)
+      }));
+    } else {
+      this.setState(prevState => ({
+        ...prevState,
+        unselectedGenreIdList: prevState.unselectedGenreIdList.filter(
+          x => x !== id
+        )
+      }));
+    }
+  };
+
+  updateUnselectedPrimitiveIdList = (id: number, checked: boolean) => {
+    if (!checked) {
+      this.setState(prevState => ({
+        ...prevState,
+        unselectedPrimitiveIdList: prevState.unselectedPrimitiveIdList.concat(
+          id
+        )
+      }));
+    } else {
+      this.setState(prevState => ({
+        ...prevState,
+        unselectedPrimitiveIdList: prevState.unselectedPrimitiveIdList.filter(
+          x => x !== id
+        )
+      }));
+    }
+  };
 
   setPlayedTrack = (playedTrack: Song) => (
     e: React.SyntheticEvent<HTMLDivElement>

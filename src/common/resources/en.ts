@@ -48,5 +48,13 @@ export const en: any = {
   deselectAll: "Clear",
   pageLoading: "Page is loading",
   primitive: "Primitive",
-  value: "Value"
+  superPrimitives: "Super primitives",
+  value: "Value",
+  exportCsv: "Export results to CSV",
+  genre: "Genre",
+  currentNumber: "Current number",
+  cancel: "Cancel",
+  export: "Export",
+  changeNumberGenres: "You can change the number of tracks of each genre before exporting them",
+  errorModal: "Please fix the errors before exporting"
 };

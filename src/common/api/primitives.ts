@@ -11,7 +11,7 @@ export type Primitive = {
 };
 
 export class PrimitivesAPI {
-  updatePrimitive(primitive: Primitive) {
+  async updatePrimitive(primitive: Primitive) {
     return this.perform("put", "/api/primitive/update", primitive);
   }
 
