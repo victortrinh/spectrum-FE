@@ -48,5 +48,14 @@ export const fr: any = {
   deselectAll: "Effacer",
   pageLoading: "Chargement de la page",
   primitive: "Primitive",
-  value: "Valeur"
+  superPrimitives: "Super primitives",
+  value: "Valeur",
+  exportCsv: "Exporter les résultats en CSV",
+  genre: "Genre",
+  currentNumber: "Nombre courant",
+  cancel: "Annuler",
+  export: "Exporter",
+  changeNumberGenres:
+    "Vous pouvez modifier le nombre de chansons de chaque genre avant de les exporter.",
+  errorModal: "Veuillez corriger les erreurs avant d'exporter"
 };

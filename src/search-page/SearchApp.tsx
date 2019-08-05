@@ -12,7 +12,8 @@ import { Results } from "./Results";
 import { SongsAPI, Song } from "common/api/songs";
 import { CheckboxModel } from "./common/models/checkboxModel";
 import { Loading } from "common/components/Loading";
-import { AudioPlayer } from './AudioPlayer';
+import { AudioPlayer } from "./AudioPlayer";
+import { GenresAPI } from "common/api/genres";
 
 type State = {
   page: number;
@@ -24,17 +25,21 @@ type State = {
   allFilteredTracks: Song[];
   tracks: Song[];
   searched: boolean;
+  genres: CheckboxModel[];
 };
 
 type Props = {
   tracksDB: Song[];
   areTracksLoading: boolean;
+  unselectedGenreIdList: number[];
+  unselectedPrimitiveIdList: number[];
 };
 
 export class SearchApp extends React.PureComponent<Props, State> {
   private searchInputRef = createRef<HTMLInputElement>();
   private filterComponent = createRef<HTMLDivElement>();
   songsApi: SongsAPI = new SongsAPI();
+  genresAPI: GenresAPI = new GenresAPI();
 
   constructor(props: any) {
     super(props);
@@ -48,8 +53,19 @@ export class SearchApp extends React.PureComponent<Props, State> {
       enteredSearchTerm: "",
       allFilteredTracks: [],
       tracks: [],
+      genres: [],
       searched: false
     };
+  }
+
+  async componentDidMount() {
+    const genres = await this.genresAPI
+      .getGenres()
+      .then(data => data.data.genres);
+
+    this.setState({
+      genres
+    });
   }
 
   onKeyPress = (e: any) => {
@@ -74,23 +90,12 @@ export class SearchApp extends React.PureComponent<Props, State> {
       () => {
         const searchTerm = this.state.searchTerm.toLowerCase();
 
-        let allGenres: CheckboxModel[] = [];
-        let genresSelected: string[] = [];
-
-        if (this.filterComponent.current) {
-          const allGenreInputs = this.filterComponent.current
-            .querySelectorAll("#genresFilter")[0]
-            .querySelectorAll<HTMLInputElement>("input[type='checkbox']");
-
-          allGenreInputs.forEach((x: any) =>
-            allGenres.push({
-              is_selected: x.checked,
-              name: x.labels[0].innerHTML
-            } as CheckboxModel)
-          );
-        }
-
-        genresSelected = allGenres.filter(x => x.is_selected).map(x => x.name);
+        const genresSelected = this.state.genres
+          .filter(
+            x =>
+              !this.props.unselectedGenreIdList.includes(x.id) && x.is_selected
+          )
+          .map(x => x.name);
 
         const filteredResults = this.props.tracksDB.filter(
           x =>
@@ -166,11 +171,17 @@ export class SearchApp extends React.PureComponent<Props, State> {
               <Filter />
             </div>
             <div className="col-md-12 col-lg-9">
-              <Results fetchMore={this.fetchMore} {...this.state} />
+              <Results
+                fetchMore={this.fetchMore}
+                {...this.state}
+                {...this.props}
+              />
             </div>
           </div>
         </div>
-        <AudioPlayer />
+        <AppContext.Consumer>
+          {context => <AudioPlayer track={context.playedTrack} />}
+        </AppContext.Consumer>
       </StyledSearchApp>
     );
   }

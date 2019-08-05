@@ -3,8 +3,7 @@ import styled from "styled-components";
 import randomColor from "randomcolor";
 import PieChart from "react-minimal-pie-chart";
 import AppContext from "AppContext";
-import ReactLoading from "react-loading";
-import { lightGray, white, black } from "common/styles/colors";
+import { lightGray, white } from "common/styles/colors";
 import { Resource } from "common/components/Resource";
 import { StyledButton } from "common/components/Button.styles";
 import { Redirect } from "react-router";
@@ -14,12 +13,18 @@ import { FilterSelection } from "search-page/common/components/FilterSelection";
 import { CheckboxSelection } from "search-page/common/components/CheckboxSelection";
 import { GenresAPI } from "common/api/genres";
 import { PrimitivesAPI } from "common/api/primitives";
-import { CheckboxModel } from "search-page/common/models/checkboxModel";
+import {
+  CheckboxModel,
+  PrimitiveCheckboxModel
+} from "search-page/common/models/checkboxModel";
+import { Loading } from "common/components/Loading";
 
 type State = {
   createUser: boolean;
   addSongs: boolean;
   genres: GenreModel[];
+  genresDB: CheckboxModel[];
+  primitivesDB: PrimitiveCheckboxModel[];
   genresLoading: boolean;
 };
 
@@ -34,11 +39,52 @@ export class AdminApp extends React.PureComponent<{}, State> {
       createUser: false,
       addSongs: false,
       genres: [],
+      genresDB: [],
+      primitivesDB: [],
       genresLoading: true
     };
   }
 
   async componentDidMount() {
+    const genresDB = await this.genresAPI
+      .getGenres()
+      .then(data => data.data.genres);
+
+    if (genresDB) {
+      genresDB.sort((a: CheckboxModel, b: CheckboxModel) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+    }
+
+    const primitivesDB = await this.primitivesAPI
+      .getPrimitives()
+      .then(data => data.data.primitives);
+
+    if (primitivesDB) {
+      primitivesDB.sort(
+        (a: PrimitiveCheckboxModel, b: PrimitiveCheckboxModel) => {
+          if (a.name < b.name) {
+            return -1;
+          }
+          if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        }
+      );
+    }
+
+    this.setState({
+      genresDB,
+      primitivesDB
+    });
+
     await this.getGenreStats();
   }
 
@@ -50,6 +96,18 @@ export class AdminApp extends React.PureComponent<{}, State> {
     const genresDB = await this.genresAPI
       .getGenres()
       .then(data => data.data.genres);
+
+    if (genresDB) {
+      genresDB.sort((a: CheckboxModel, b: CheckboxModel) => {
+        if (a.name < b.name) {
+          return -1;
+        }
+        if (a.name > b.name) {
+          return 1;
+        }
+        return 0;
+      });
+    }
 
     let genres = genresStats.map((itm: GenreModel) => ({
       ...genresDB.find((item: CheckboxModel) => item.id === itm.id && item),
@@ -78,9 +136,10 @@ export class AdminApp extends React.PureComponent<{}, State> {
       genres: genres.map((genre: GenreModel, index: number) => ({
         ...genre,
         color: colors[index]
-      }))
+      })),
+      genresDB
     });
-  }
+  };
 
   createUser = () => {
     this.setState({
@@ -105,7 +164,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
 
   onChangeCheckboxGenre = async (e: React.SyntheticEvent<HTMLInputElement>) => {
     await this.genresAPI.updateGenre({
-      id: Number(e.currentTarget.id),
+      id: Number(e.currentTarget.dataset.id),
       selected: e.currentTarget.checked
     });
 
@@ -117,25 +176,53 @@ export class AdminApp extends React.PureComponent<{}, State> {
     );
   };
 
-  onChangeCheckboxPrimitive = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    this.primitivesAPI.updatePrimitive({
-      id: Number(e.currentTarget.id),
+  onChangeCheckboxPrimitive = async (
+    e: React.SyntheticEvent<HTMLInputElement>
+  ) => {
+    this.setState({
+      genresLoading: true
+    });
+
+    await this.primitivesAPI.updatePrimitive({
+      id: Number(e.currentTarget.dataset.id),
       selected: e.currentTarget.checked
+    });
+
+    const primitivesDB = await this.primitivesAPI
+      .getPrimitives()
+      .then(data => data.data.primitives);
+
+    if (primitivesDB) {
+      primitivesDB.sort(
+        (a: PrimitiveCheckboxModel, b: PrimitiveCheckboxModel) => {
+          if (a.name < b.name) {
+            return -1;
+          }
+          if (a.name > b.name) {
+            return 1;
+          }
+          return 0;
+        }
+      );
+    }
+
+    this.setState({
+      primitivesDB,
+      genresLoading: false
     });
   };
 
   render() {
-    const { createUser, addSongs, genres, genresLoading } = this.state;
+    const {
+      createUser,
+      addSongs,
+      genres,
+      genresLoading,
+      genresDB,
+      primitivesDB
+    } = this.state;
 
-    const loadingComponent = (
-      <ReactLoading
-        className="loading"
-        type="spinningBubbles"
-        color={black}
-        height={100}
-        width={100}
-      />
-    );
+    const loadingComponent = <Loading />;
 
     if (createUser) {
       return <Redirect to="/createUser" />;
@@ -147,6 +234,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
 
     return (
       <StyledAdminApp>
+        {genresLoading && loadingComponent}
         <div className="container">
           <div className="header">
             <span className="title">
@@ -175,41 +263,38 @@ export class AdminApp extends React.PureComponent<{}, State> {
                     <Resource resourceKey="currentDatabaseDistribution" />
                   </div>
                 </div>
-                {genresLoading ? (
-                  loadingComponent
-                ) : (
-                  <div className="row">
-                    <div className="col-xs-12 col-lg-6">
-                      <PieChart
-                        lineWidth={40}
-                        data={genres.map(genre => ({
-                          title:
-                            genre.genre.toUpperCase() +
-                            " - " +
-                            genre.percentage +
-                            "%",
-                          value: genre.percentage,
-                          color: genre.color
-                        }))}
-                      />
-                    </div>
-                    <div className="col-xs-12 col-lg-6 my-auto">
-                      <ul>
-                        {genres.map(genre => (
-                          <li key={genre.id}>
-                            <span className="circle">
-                              <Circle marginBottom="3px" color={genre.color} />
-                            </span>
-                            <span className="genreName">{genre.genre}</span>
-                            <span className="float-right">
-                              {genre.percentage}%
-                            </span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+
+                <div className="row">
+                  <div className="col-xs-12 col-lg-6">
+                    <PieChart
+                      lineWidth={40}
+                      data={genres.map(genre => ({
+                        title:
+                          genre.genre.toUpperCase() +
+                          " - " +
+                          genre.percentage +
+                          "%",
+                        value: genre.percentage,
+                        color: genre.color
+                      }))}
+                    />
                   </div>
-                )}
+                  <div className="col-xs-12 col-lg-6 my-auto">
+                    <ul>
+                      {genres.map(genre => (
+                        <li key={genre.id}>
+                          <span className="circle">
+                            <Circle marginBottom="3px" color={genre.color} />
+                          </span>
+                          <span className="genreName">{genre.genre}</span>
+                          <span className="float-right">
+                            {genre.percentage}%
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="genresContainer col-xs-12 col-lg-5">
@@ -227,8 +312,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
                       >
                         <CheckboxSelection
                           marginLeft={true}
-                          checkboxes={context.genres}
-                          select={true}
+                          checkboxes={genresDB}
                           onChange={this.onChangeCheckboxGenre}
                           filterable={true}
                           placeholderForFilter={context.getResource(
@@ -247,8 +331,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
                       >
                         <CheckboxSelection
                           marginLeft={true}
-                          checkboxes={context.primitives}
-                          select={true}
+                          checkboxes={primitivesDB}
                           onChange={this.onChangeCheckboxPrimitive}
                           filterable={true}
                           placeholderForFilter={context.getResource(

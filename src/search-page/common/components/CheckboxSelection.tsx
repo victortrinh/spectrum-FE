@@ -9,10 +9,11 @@ import { primaryColor } from "common/styles/colors";
 
 type OwnProps = {
   checkboxes: CheckboxModel[];
-  onChange: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+  onChange?: (e: React.SyntheticEvent<HTMLInputElement>) => void;
+  onClick?: (e: React.SyntheticEvent<HTMLInputElement>) => void;
   marginLeft?: boolean;
-  select?: boolean;
-  selectAll?: boolean;
+  checkAll?: () => void;
+  uncheckAll?: () => void;
   filterable?: boolean;
   placeholderForFilter?: string;
   showAllAtStart?: boolean;
@@ -35,12 +36,6 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
       showAll: false,
       filteredCheckboxes: []
     };
-  }
-
-  componentDidMount() {
-    if (!this.props.select) {
-      this.selectAll();
-    }
   }
 
   onClickPositive = () => {
@@ -66,32 +61,17 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
     }));
   };
 
-  selectAll = () => {
-    if (this.checkboxSelection.current) {
-      this.checkboxSelection.current
-        .querySelectorAll<HTMLInputElement>("input[type='checkbox']")
-        .forEach(x => x.setAttribute("checked", ""));
-    }
-  };
-
-  unSelectAll = () => {
-    if (this.checkboxSelection.current) {
-      this.checkboxSelection.current
-        .querySelectorAll<HTMLInputElement>("input[type='checkbox']")
-        .forEach(x => x.removeAttribute("checked"));
-    }
-  };
-
   render() {
     const {
       marginLeft,
-      select,
       onChange,
-      selectAll,
+      checkAll,
+      uncheckAll,
       filterable,
       checkboxes,
       placeholderForFilter,
-      showAllAtStart
+      showAllAtStart,
+      onClick
     } = this.props;
     const { showAll, filteredCheckboxes } = this.state;
 
@@ -103,12 +83,12 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
         marginLeft={marginLeft}
         ref={this.checkboxSelection}
       >
-        {selectAll && (
+        {checkAll && uncheckAll && (
           <div className="selects">
-            <div className="clickable float-left" onClick={this.selectAll}>
+            <div className="clickable float-left" onClick={checkAll}>
               <Resource resourceKey="selectAll" />
             </div>
-            <div className="clickable float-right" onClick={this.unSelectAll}>
+            <div className="clickable float-right" onClick={uncheckAll}>
               <Resource resourceKey="deselectAll" />
             </div>
           </div>
@@ -126,14 +106,13 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
             <input
               type="checkbox"
               className="custom-control-input"
-              id={checkbox.id.toString()}
-              defaultChecked={select ? checkbox.is_selected : undefined}
+              data-id={checkbox.id}
+              id={checkbox.name}
+              checked={checkbox.is_selected}
               onChange={onChange}
+              onClick={onClick}
             />
-            <label
-              className="custom-control-label"
-              htmlFor={checkbox.id.toString()}
-            >
+            <label className="custom-control-label" htmlFor={checkbox.name}>
               {checkbox.name}
             </label>
           </div>
@@ -145,14 +124,13 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
                 <input
                   type="checkbox"
                   className="custom-control-input"
-                  id={checkbox.id.toString()}
-                  defaultChecked={select && checkbox.is_selected}
+                  data-id={checkbox.id}
+                  id={checkbox.name}
+                  checked={checkbox.is_selected}
                   onChange={onChange}
+                  onClick={onClick}
                 />
-                <label
-                  className="custom-control-label"
-                  htmlFor={checkbox.id.toString()}
-                >
+                <label className="custom-control-label" htmlFor={checkbox.name}>
                   {checkbox.name}
                 </label>
               </div>
