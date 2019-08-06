@@ -283,7 +283,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
                         title:
                           genre.genre.toUpperCase() +
                           " - " +
-                          genre.percentage +
+                          genre.percentage.toFixed(2) +
                           "%",
                         value: genre.percentage,
                         color: genre.color
@@ -299,7 +299,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
                           </span>
                           <span className="genreName">{genre.genre}</span>
                           <span className="float-right">
-                            {genre.percentage}%
+                            {genre.percentage.toFixed(2)}%
                           </span>
                         </li>
                       ))}
