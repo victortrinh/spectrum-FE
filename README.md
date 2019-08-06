@@ -40,6 +40,7 @@ yarn start
 │   ├── @types
 │   ├── common
 │   │   ├── api
+│   │   |   ├── service.ts
 │   │   ├── components
 │   │   |   ├── SharedAppComponents.tsx
 │   │   ├── images
