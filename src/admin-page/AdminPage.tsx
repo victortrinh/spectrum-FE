@@ -212,6 +212,17 @@ export class AdminApp extends React.PureComponent<{}, State> {
     });
   };
 
+  onDelete = (genreId: number) => async () => {
+    await this.genresAPI.deleteGenre({ id: genreId });
+
+    this.setState(
+      {
+        genresLoading: true
+      },
+      () => this.getGenreStats()
+    );
+  };
+
   render() {
     const {
       createUser,
@@ -311,6 +322,7 @@ export class AdminApp extends React.PureComponent<{}, State> {
                         backgroundHeader={true}
                       >
                         <CheckboxSelection
+                          onDelete={this.onDelete}
                           marginLeft={true}
                           checkboxes={genresDB}
                           onChange={this.onChangeCheckboxGenre}

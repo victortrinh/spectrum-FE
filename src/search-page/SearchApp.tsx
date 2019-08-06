@@ -18,6 +18,7 @@ import { GenresAPI } from "common/api/genres";
 type State = {
   page: number;
   isLoading: boolean;
+  numberOfSongs: number | undefined;
   moreResultsLoading: boolean;
   totalResults: number;
   searchTerm: string;
@@ -47,6 +48,7 @@ export class SearchApp extends React.PureComponent<Props, State> {
     this.state = {
       page: 0,
       isLoading: false,
+      numberOfSongs: undefined,
       moreResultsLoading: false,
       totalResults: 0,
       searchTerm: "",
@@ -97,13 +99,17 @@ export class SearchApp extends React.PureComponent<Props, State> {
           )
           .map(x => x.name);
 
-        const filteredResults = this.props.tracksDB.filter(
+        let filteredResults = this.props.tracksDB.filter(
           x =>
             (x.title.toLowerCase().includes(searchTerm) ||
               x.artist.toLowerCase().includes(searchTerm) ||
               x.album.toLowerCase().includes(searchTerm)) &&
             genresSelected.includes(x.genre)
         );
+
+        if (this.state.numberOfSongs) {
+          filteredResults = filteredResults.slice(0, this.state.numberOfSongs);
+        }
 
         this.setState({
           page: 1,
@@ -124,6 +130,14 @@ export class SearchApp extends React.PureComponent<Props, State> {
       page: prevState.page + 1,
       tracks: prevState.allFilteredTracks.slice(0, 15 * (prevState.page + 1))
     }));
+  };
+
+  onChangeNumberOfSongs = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const value = Number(e.currentTarget.value);
+
+    this.setState({
+      numberOfSongs: value
+    });
   };
 
   render() {
@@ -168,7 +182,10 @@ export class SearchApp extends React.PureComponent<Props, State> {
         <div className="results container">
           <div className="row">
             <div className="col-md-12 col-lg-3" ref={this.filterComponent}>
-              <Filter />
+              <Filter
+                onChange={this.onChangeNumberOfSongs}
+                onClick={this.onSearch}
+              />
             </div>
             <div className="col-md-12 col-lg-9">
               <Results

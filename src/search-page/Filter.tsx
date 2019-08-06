@@ -7,7 +7,12 @@ import { CheckboxSelection } from "./common/components/CheckboxSelection";
 import { StyledInput } from "common/components/Form.styles";
 import { StyledButton } from "common/components/Button.styles";
 
-export class Filter extends React.PureComponent {
+type Props = {
+  onChange: any;
+  onClick: any;
+};
+
+export class Filter extends React.PureComponent<Props> {
   render() {
     return (
       <StyledFilter>
@@ -20,8 +25,12 @@ export class Filter extends React.PureComponent {
           borderTop={true}
         >
           <div className="input-group">
-            <StyledNumberOfSongsInput className="form-control" />
+            <StyledNumberOfSongsInput
+              onChange={this.props.onChange}
+              className="form-control"
+            />
             <StyledNumberOfSongsButton
+              onClick={this.props.onClick}
               className="input-group-addon"
               variant="secondary"
             >

@@ -5,36 +5,29 @@ const client = axios.create({
   baseURL: env.pythonBaseUrl
 });
 
-export type Genre = {
-  id: number;
-  selected: boolean;
+export type CrawlerNbGenre = {
+  nb_genres: number;
+  nb_songs_per_genre: number;
 };
 
-export type GenreId = {
-  id: number;
+export type CrawlerGenre = {
+  genre: string;
+  nb_songs: number;
 };
 
-export class GenresAPI {
-  async updateGenre(genre: Genre) {
-    return await this.perform("put", "/api/genre/update", genre);
+export class CrawlerAPI {
+  async crawlByNbGenre(crawlerNbGenre: CrawlerNbGenre) {
+    return this.perform("post", "/api/crawler/", crawlerNbGenre);
   }
 
-  async getGenres() {
-    return this.perform("get", "/api/genre/all");
-  }
-
-  async getStats() {
-    return this.perform("get", "/api/genre/stats");
-  }
-
-  async deleteGenre(genreId: GenreId) {
-    this.perform("delete", "/api/genre/delete", genreId);
+  async crawlByGenre(crawlerGenre: CrawlerGenre) {
+    return this.perform("post", "/api/crawler/genre", crawlerGenre);
   }
 
   async perform(
     method: any,
     resource: any,
-    data: Genre | GenreId | null = null
+    data: CrawlerNbGenre | CrawlerGenre | null = null
   ) {
     return client({
       method,

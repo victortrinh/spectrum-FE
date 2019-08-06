@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import PlusLogo from "../../../common/images/plus.svg";
 import MinusLogo from "../../../common/images/minus.svg";
+import DeleteIcon from "../../../common/images/delete.svg";
 import { CheckboxModel } from "../models/checkboxModel";
 import { Resource } from "common/components/Resource";
 import { StyledInput } from "common/components/Form.styles";
@@ -17,6 +18,7 @@ type OwnProps = {
   filterable?: boolean;
   placeholderForFilter?: string;
   showAllAtStart?: boolean;
+  onDelete?: (id: number) => () => void;
 };
 
 type State = {
@@ -71,7 +73,8 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
       checkboxes,
       placeholderForFilter,
       showAllAtStart,
-      onClick
+      onClick,
+      onDelete
     } = this.props;
     const { showAll, filteredCheckboxes } = this.state;
 
@@ -115,6 +118,13 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
             <label className="custom-control-label" htmlFor={checkbox.name}>
               {checkbox.name}
             </label>
+            {onDelete && (
+              <img
+                src={DeleteIcon}
+                onClick={onDelete(checkbox.id)}
+                alt="delete"
+              />
+            )}
           </div>
         ))}
         {showAll || showAllAtStart ? (
@@ -133,6 +143,13 @@ export class CheckboxSelection extends React.PureComponent<Props, State> {
                 <label className="custom-control-label" htmlFor={checkbox.name}>
                   {checkbox.name}
                 </label>
+                {onDelete && (
+                  <img
+                    src={DeleteIcon}
+                    onClick={onDelete(checkbox.id)}
+                    alt="delete"
+                  />
+                )}
               </div>
             ))}
             {!showAllAtStart && (
@@ -170,6 +187,13 @@ type StyledCheckboxSelectionProps = {
 const StyledCheckboxSelection = styled.div<StyledCheckboxSelectionProps>`
   label {
     padding-left: 5px !important;
+  }
+
+  img {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+    float: right;
   }
 
   .filter {
