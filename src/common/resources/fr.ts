@@ -67,5 +67,6 @@ export const fr: any = {
   add: "Ajouter",
   NumberOfNewGenres: "Nombre de nouveaux genres",
   NumberOfSongsPerGenre: "Nombre de chansons par genre",
-  numberForGenre: "Nombre de chansons pour ce genre"
+  numberForGenre: "Nombre de chansons pour ce genre",
+  filterByGenre: "Filtrer par genre"
 };

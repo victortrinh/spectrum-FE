@@ -11,6 +11,7 @@ import { LastFmAPI } from "common/api/lastfm";
 import { StyledInput } from "common/components/Form.styles";
 import { StyledButton } from "common/components/Button.styles";
 import { CrawlerNbGenre, CrawlerGenre, CrawlerAPI } from "common/api/crawler";
+import AppContext from "AppContext";
 
 type State = {
   tracksLoading: boolean;
@@ -22,6 +23,10 @@ type State = {
   crawlerGenre: CrawlerGenre;
   errorCrawlerNbGenre: boolean;
   errorCrawlerGenre: boolean;
+  filterGenre: string;
+  filterGenreTracks: string;
+  filteredGenres: string[];
+  filteredTracks: Song[];
 };
 
 export class AddSongsApp extends React.PureComponent<{}, State> {
@@ -36,6 +41,8 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
       tracksLoading: true,
       tracksDB: [],
       lastFmTopTags: [],
+      filteredGenres: [],
+      filteredTracks: [],
       numberOfSongs: 0,
       selectedGenre: "",
       crawlerNbGenre: {
@@ -47,7 +54,9 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
         nb_songs: 0
       },
       errorCrawlerNbGenre: true,
-      errorCrawlerGenre: true
+      errorCrawlerGenre: true,
+      filterGenre: "",
+      filterGenreTracks: ""
     };
   }
 
@@ -260,10 +269,28 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
     });
   };
 
+  onChangeGenreAdd = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value;
+
+    this.setState(prevState => ({
+      filteredGenres: prevState.lastFmTopTags.filter(x => x.includes(value))
+    }));
+  };
+
+  onChangeGenreTracks = (e: React.SyntheticEvent<HTMLInputElement>) => {
+    const value = e.currentTarget.value;
+
+    this.setState(prevState => ({
+      filteredTracks: prevState.tracksDB.filter(x => x.genre.includes(value))
+    }));
+  };
+
   render() {
     const {
       tracksLoading,
       tracksDB,
+      filteredTracks,
+      filteredGenres,
       numberOfSongs,
       lastFmTopTags,
       selectedGenre,
@@ -321,10 +348,22 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
             <Resource resourceKey="addSongsByGenre" />
           </div>
           <div className="addSongsByNumber">
+            <AppContext.Consumer>
+              {context => (
+                <StyledInput
+                  className="mb-2"
+                  onChange={this.onChangeGenreAdd}
+                  placeholder={context.getResource("filterByGenre")}
+                />
+              )}
+            </AppContext.Consumer>
             <div className="row">
               <div className="col-sm-6 lastFmGenres">
                 <ul>
-                  {lastFmTopTags.map(genre => (
+                  {(filteredGenres.length > 0
+                    ? filteredGenres
+                    : lastFmTopTags
+                  ).map(genre => (
                     <li
                       className={classNames("clickable", {
                         selected: selectedGenre === genre
@@ -376,6 +415,18 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
             <table>
               <thead>
                 <tr>
+                  <th colSpan={6}>
+                    <AppContext.Consumer>
+                      {context => (
+                        <StyledInput
+                          onChange={this.onChangeGenreTracks}
+                          placeholder={context.getResource("filterByGenre")}
+                        />
+                      )}
+                    </AppContext.Consumer>
+                  </th>
+                </tr>
+                <tr>
                   <th>ID</th>
                   <th>
                     <Resource resourceKey="genre" />
@@ -390,24 +441,26 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
                 </tr>
               </thead>
               <tbody>
-                {tracksDB.map(track => (
-                  <tr key={track.id}>
-                    <td>{track.id}</td>
-                    <td className="genre">{track.genre}</td>
-                    <td>
-                      <img src={track.art} alt="album" />
-                    </td>
-                    <td>{track.title}</td>
-                    <td>{track.album}</td>
-                    <td onClick={this.deleteSong(track.id)}>
-                      <img
-                        className="deleteIcon clickable"
-                        src={DeleteIcon}
-                        alt="delete"
-                      />
-                    </td>
-                  </tr>
-                ))}
+                {(filteredTracks.length > 0 ? filteredTracks : tracksDB).map(
+                  track => (
+                    <tr key={track.id}>
+                      <td>{track.id}</td>
+                      <td className="genre">{track.genre}</td>
+                      <td>
+                        <img src={track.art} alt="album" />
+                      </td>
+                      <td>{track.title}</td>
+                      <td>{track.album}</td>
+                      <td onClick={this.deleteSong(track.id)}>
+                        <img
+                          className="deleteIcon clickable"
+                          src={DeleteIcon}
+                          alt="delete"
+                        />
+                      </td>
+                    </tr>
+                  )
+                )}
               </tbody>
             </table>
           </div>
