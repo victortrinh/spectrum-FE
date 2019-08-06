@@ -7,7 +7,6 @@ import { SongsAPI, Song } from "common/api/songs";
 import { millisToMinutesAndSeconds } from "common/api/utilities";
 import { Resource } from "common/components/Resource";
 import { gray, white, lightGray } from "common/styles/colors";
-import { lighten } from "polished";
 import { LastFmAPI } from "common/api/lastfm";
 import { StyledInput } from "common/components/Form.styles";
 import { StyledButton } from "common/components/Button.styles";
@@ -47,8 +46,8 @@ export class AddSongsApp extends React.PureComponent<{}, State> {
         genre: "",
         nb_songs: 0
       },
-      errorCrawlerNbGenre: false,
-      errorCrawlerGenre: false
+      errorCrawlerNbGenre: true,
+      errorCrawlerGenre: true
     };
   }
 
@@ -444,7 +443,6 @@ const StyledAddSongsApp = styled.div`
   }
 
   .addSongsByNumber {
-    box-shadow: 0 0 2px 2px ${lighten(0.55, lightGray)};
     background-color: ${white};
     border-radius: 10px;
     padding: 20px;
@@ -490,7 +488,6 @@ const StyledAddSongsApp = styled.div`
 
   .tableContainer {
     background-color: ${white};
-    box-shadow: 0 0 2px 2px ${lighten(0.55, lightGray)};
     border-radius: 10px;
     width: 100%;
 

@@ -34,6 +34,7 @@ export const StyledButton = styled.button<Props>`
     &:disabled,
     &:disabled:hover {
       color: ${white};
+      border-color: ${gray};
       background: ${gray};
       cursor: not-allowed;
     }
