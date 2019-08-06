@@ -3,7 +3,8 @@ import React from "react";
 import { StyledInput } from "./Form.styles";
 
 type OwnProps = {
-  value: string;
+  defaultValue?: string;
+  value?: string;
   getErrorMessage: any;
   getValue: any;
   onChange: (e: React.SyntheticEvent<HTMLInputElement>) => void;

@@ -54,10 +54,10 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   .error {
+    border: 1px solid red !important;
     color: ${red};
     padding-left: 5px;
     float: left;
-    margin-bottom: 10px;
   }
 
   .clickable {

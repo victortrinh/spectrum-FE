@@ -48,5 +48,24 @@ export const en: any = {
   deselectAll: "Clear",
   pageLoading: "Page is loading",
   primitive: "Primitive",
-  value: "Value"
+  superPrimitives: "Super primitives",
+  value: "Value",
+  exportCsv: "Export results to CSV",
+  genre: "Genre",
+  currentNumber: "Current number",
+  cancel: "Cancel",
+  export: "Export",
+  changeNumberGenres:
+    "You can change the number of tracks of each genre before exporting them",
+  errorModal: "Please fix the errors before exporting",
+  album: "Album",
+  name: "Name",
+  songsInDatabase: "songs in database",
+  songs: "Songs",
+  addSongsByGenre: "Add songs by genre",
+  addSongsByNumber: "Add songs by number",
+  add: "Add",
+  NumberOfNewGenres: "Number of new genres",
+  NumberOfSongsPerGenre: "Number of songs per genre",
+  numberForGenre: "Number of songs for this genre"
 };

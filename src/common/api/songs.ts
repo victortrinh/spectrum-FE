@@ -11,10 +11,14 @@ export type Song = {
   genre: string;
   title: string;
   duration: string;
-  image_src: string;
+  art: string;
   album: string;
   primitives: any;
-  preview_url: string;
+  sound: string | null;
+};
+
+export type DeleteSong = {
+  id: number;
 };
 
 export class SongsAPI {
@@ -26,7 +30,15 @@ export class SongsAPI {
     return this.perform("get", "/api/song/" + trackId);
   }
 
-  async perform(method: any, resource: any, data: Song | null = null) {
+  async deleteSong(deleteSong: DeleteSong) {
+    this.perform("delete", "/api/song/delete", deleteSong);
+  }
+
+  async perform(
+    method: any,
+    resource: any,
+    data: Song | DeleteSong | null = null
+  ) {
     return client({
       method,
       url: resource,

@@ -7,15 +7,12 @@ import { CheckboxSelection } from "./common/components/CheckboxSelection";
 import { StyledInput } from "common/components/Form.styles";
 import { StyledButton } from "common/components/Button.styles";
 
-export class Filter extends React.PureComponent {
-  onChangeCheckboxGenre = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    // TODO
-  };
+type Props = {
+  onChange: any;
+  onClick: any;
+};
 
-  onChangeCheckboxPrimitive = (e: React.SyntheticEvent<HTMLInputElement>) => {
-    // TODO
-  };
-
+export class Filter extends React.PureComponent<Props> {
   render() {
     return (
       <StyledFilter>
@@ -28,8 +25,12 @@ export class Filter extends React.PureComponent {
           borderTop={true}
         >
           <div className="input-group">
-            <StyledNumberOfSongsInput className="form-control" />
+            <StyledNumberOfSongsInput
+              onChange={this.props.onChange}
+              className="form-control"
+            />
             <StyledNumberOfSongsButton
+              onClick={this.props.onClick}
               className="input-group-addon"
               variant="secondary"
             >
@@ -46,9 +47,27 @@ export class Filter extends React.PureComponent {
               borderTop={true}
             >
               <CheckboxSelection
-                checkboxes={context.genres.filter(genre => genre.is_selected)}
-                onChange={this.onChangeCheckboxGenre}
-                selectAll={true}
+                checkboxes={
+                  context.genres
+                    ? context.genres
+                        .filter(genre => genre.is_selected)
+                        .map(x => ({
+                          is_selected: !context.unselectedGenreIdList.includes(
+                            x.id
+                          ),
+                          name: x.name,
+                          id: x.id
+                        }))
+                    : []
+                }
+                onClick={(e: React.SyntheticEvent<HTMLInputElement>) => {
+                  context.updateUnselectedGenreIdList(
+                    Number(e.currentTarget.dataset.id),
+                    e.currentTarget.checked
+                  );
+                }}
+                checkAll={context.userCheckAllGenres}
+                uncheckAll={context.userUncheckAllGenres}
                 showAllAtStart={true}
               />
             </FilterSelection>
@@ -57,18 +76,35 @@ export class Filter extends React.PureComponent {
         <AppContext.Consumer>
           {context => (
             <FilterSelection
+              id="primitives"
               headerResourceKey="primitives"
               showFilterAtStart={true}
               borderTop={true}
               borderBottom={true}
             >
               <CheckboxSelection
-                checkboxes={context.primitives.filter(
-                  primitive => primitive.is_selected
-                )}
-                onChange={this.onChangeCheckboxPrimitive}
+                checkboxes={
+                  context.primitives
+                    ? context.primitives
+                        .filter(primitive => primitive.is_selected)
+                        .map(x => ({
+                          is_selected: !context.unselectedPrimitiveIdList.includes(
+                            x.id
+                          ),
+                          name: x.name,
+                          id: x.id
+                        }))
+                    : []
+                }
+                onClick={(e: React.SyntheticEvent<HTMLInputElement>) => {
+                  context.updateUnselectedPrimitiveIdList(
+                    Number(e.currentTarget.dataset.id),
+                    e.currentTarget.checked
+                  );
+                }}
+                checkAll={context.userCheckAllPrimitives}
+                uncheckAll={context.userUncheckAllPrimitives}
                 showAllAtStart={true}
-                selectAll={true}
               />
             </FilterSelection>
           )}

@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import DownloadLogo from "common/images/download.svg";
 import ExportLogo from "common/images/export.svg";
-import GraphPic from "common/images/graph_demo.png";
 import ReactAudioPlayer from "react-audio-player";
 import { Song, SongsAPI } from "common/api/songs";
 import { millisToMinutesAndSeconds } from "common/api/utilities";
@@ -19,25 +19,36 @@ import { StyledButton } from "common/components/Button.styles";
 import { Resource } from "common/components/Resource";
 import { lighten } from "polished";
 import { PrimitivesAPI } from "common/api/primitives";
-import { CheckboxModel } from "search-page/common/models/checkboxModel";
+import { PrimitiveCheckboxModel } from "search-page/common/models/checkboxModel";
+import {
+  ExportCsvAPI,
+  Export,
+  ExportSuperPrimitive
+} from "common/api/exportcsv";
+import AppContext from "AppContext";
+import { SpectrogramAPI } from "common/api/spectrogram";
 
 type State = {
   track: Song | null;
-  selectedPrimitive: string;
   selectedPrimitives: string[];
+  allPrimitives: PrimitiveCheckboxModel[];
+  spectrogram: string;
 };
 
 export class TrackApp extends React.PureComponent<{ match: any }, State> {
   songsApi: SongsAPI = new SongsAPI();
   primitivesAPI: PrimitivesAPI = new PrimitivesAPI();
+  exportCsvAPI: ExportCsvAPI = new ExportCsvAPI();
+  spectrogramAPI: SpectrogramAPI = new SpectrogramAPI();
 
   constructor(props: any) {
     super(props);
 
     this.state = {
       track: null,
-      selectedPrimitive: "",
-      selectedPrimitives: []
+      selectedPrimitives: [],
+      allPrimitives: [],
+      spectrogram: ""
     };
   }
 
@@ -48,37 +59,44 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
       }
     } = this.props;
 
-    const selectedPrimitives = await this.primitivesAPI
+    const allPrimitives = await this.primitivesAPI
       .getPrimitives()
-      .then(data =>
-        (data.data.primitives as CheckboxModel[])
-          .filter(x => x.is_selected)
-          .map(x => x.name)
-      );
+      .then(data => data.data.primitives as PrimitiveCheckboxModel[]);
+
+    const selectedPrimitives = allPrimitives
+      .filter(x => x.is_selected)
+      .map(x => x.name);
 
     const track = await this.songsApi.getSong(id).then(
       data =>
         ({
           ...data.data,
-          image_src:
-            "https://i.scdn.co/image/966ade7a8c43b72faa53822b74a899c675aaafee",
           duration: millisToMinutesAndSeconds(
             Number(data.data.primitives[0][1])
-          ),
-          album: "TODO ADD ALBUM",
-          preview_url:
-            "https://p.scdn.co/mp3-preview/229bb6a4c7011158cc7e1aff11957e274dc05e84?cid=774b29d4f13844c495f206cafdad9c86"
+          )
         } as Song)
     );
 
+    const response = await this.spectrogramAPI
+      .getSpectrogram({ song_id: track.id })
+      .then(data => data);
+
+    const imgFile = new Blob([response.data]);
+    const spectrogram = URL.createObjectURL(imgFile);
+
     this.setState({
       track,
-      selectedPrimitives
+      selectedPrimitives,
+      allPrimitives,
+      spectrogram
     });
   }
 
   selectPrimitive = (e: React.SyntheticEvent<HTMLTableRowElement>) => {
-    const selectedPrimitive = e.currentTarget.id;
+    if (e.currentTarget.classList.contains("selected")) {
+      e.currentTarget.classList.remove("selected");
+      return;
+    }
 
     if (e.currentTarget.parentElement) {
       const primitiveRows = e.currentTarget.parentElement.querySelectorAll<
@@ -88,14 +106,61 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
     }
 
     e.currentTarget.classList.add("selected");
+  };
 
-    this.setState({
-      selectedPrimitive
-    });
+  getSuperPrimitive = (trackId: number, super_primitive: string) => async (
+    e: React.SyntheticEvent<HTMLTableDataCellElement>
+  ) => {
+    e.stopPropagation();
+    const song_ids = [trackId];
+    const primitive = this.state.allPrimitives.find(
+      x => x.name === super_primitive
+    );
+
+    if (primitive) {
+      const primitive_id = primitive.id;
+      const csv = await this.exportCsvAPI
+        .getSuperPrimitiveCsv({
+          song_ids,
+          primitive_id
+        } as ExportSuperPrimitive)
+        .then(data => data.data);
+
+      this.download(csv, primitive.name + "-" + trackId);
+    }
+  };
+
+  exportCSV = (trackId: number, unselectedPrimitiveIdList: number[]) => async (
+    e: React.SyntheticEvent<HTMLButtonElement>
+  ) => {
+    const song_ids = [trackId];
+    const primitive_ids = this.state.allPrimitives
+      .filter(
+        x =>
+          this.state.selectedPrimitives.includes(x.name) &&
+          !unselectedPrimitiveIdList.includes(x.id) &&
+          !x.is_super_primitive
+      )
+      .map(x => x.id);
+
+    const csv = await this.exportCsvAPI
+      .getCsv({ song_ids, primitive_ids } as Export)
+      .then(data => data.data);
+
+    this.download(csv, "data-" + trackId);
+  };
+
+  download = (csv: any, name: string) => {
+    const link = document.createElement("a");
+    link.href = `data:text/csv,${encodeURI(csv)}`;
+    link.download = name + `.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   render() {
-    const { track, selectedPrimitive, selectedPrimitives } = this.state;
+    const { track, allPrimitives, spectrogram } = this.state;
 
     if (!track) {
       return <Loading />;
@@ -105,14 +170,24 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
       <StyledTrackApp className="container">
         <div className="trackContainer row">
           <div className="col-lg-3 pl-0 pr-0 trackImage">
-            <img src={track.image_src} alt={track.title + " album picture"} />
+            <img src={track.art} alt={track.title + " album picture"} />
           </div>
           <div className="col-lg-9 pl-0 pr-0">
             <div className="exportButtonContainer">
-              <StyledExportToCsvButton className="float-right">
-                <img src={ExportLogo} alt="Export logo" />
-                <Resource resourceKey="exportToCsv" />
-              </StyledExportToCsvButton>
+              <AppContext.Consumer>
+                {context => (
+                  <StyledExportToCsvButton
+                    className="float-right"
+                    onClick={this.exportCSV(
+                      track.id,
+                      context.unselectedPrimitiveIdList
+                    )}
+                  >
+                    <img src={ExportLogo} alt="Export logo" />
+                    <Resource resourceKey="exportToCsv" />
+                  </StyledExportToCsvButton>
+                )}
+              </AppContext.Consumer>
             </div>
             <div className="artist">{track.artist}</div>
             <div>
@@ -120,57 +195,88 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
               <div className="float-right genre">{track.genre}</div>
             </div>
             <div className="album">{track.album}</div>
-            <ReactAudioPlayer src={track.preview_url} controls />
+            {track.sound && <ReactAudioPlayer src={track.sound} controls />}
           </div>
         </div>
-        <div className="primitivesContainer row mr-0 ml-0">
-          <div className="col-lg-3">
+
+        {spectrogram !== "" && (
+          <div className="spectrogram">
+            <img src={spectrogram} alt="Spectrogram" />
+          </div>
+        )}
+        <div className="primitivesContainer row">
+          <div className="col-lg-6">
             <table>
               <thead>
                 <tr>
-                  <th>
+                  <th style={{ width: "150px" }}>
                     <Resource resourceKey="primitive" />
                   </th>
                   <th>
                     <Resource resourceKey="value" />
                   </th>
+                  <th style={{ width: "24px" }} />
                 </tr>
               </thead>
-              <tbody>
-                {track.primitives
-                  .filter((x: any) => selectedPrimitives.includes(x[0]))
-                  .map((primitive: any) => (
-                    <tr
-                      key={primitive[0]}
-                      className="clickable primitiveRow"
-                      id={primitive[0]}
-                      onClick={this.selectPrimitive}
-                    >
-                      <td>{primitive[0]}</td>
-                      <td>{primitive[1]}</td>
-                    </tr>
-                  ))}
-              </tbody>
+              <AppContext.Consumer>
+                {context => (
+                  <tbody>
+                    {track.primitives
+                      .filter((x: any) =>
+                        allPrimitives
+                          .filter(
+                            x =>
+                              x.is_selected &&
+                              !context.unselectedPrimitiveIdList.includes(x.id)
+                          )
+                          .map(x => x.name)
+                          .includes(x[0])
+                      )
+                      .map((primitive: any) => (
+                        <tr
+                          key={primitive[0]}
+                          className="clickable primitiveRow"
+                          id={primitive[0]}
+                          onClick={this.selectPrimitive}
+                        >
+                          <td>{primitive[0]}</td>
+                          <td>
+                            <div className="primitiveContent">
+                              {primitive[1]}
+                            </div>
+                          </td>
+                          <td
+                            onClick={
+                              this.state.allPrimitives
+                                .filter(
+                                  x =>
+                                    x.is_super_primitive &&
+                                    x.name !== "estimated_tempo"
+                                )
+                                .map(x => x.name)
+                                .includes(primitive[0])
+                                ? this.getSuperPrimitive(track.id, primitive[0])
+                                : undefined
+                            }
+                          >
+                            {this.state.allPrimitives
+                              .filter(
+                                x =>
+                                  x.is_super_primitive &&
+                                  x.name !== "estimated_tempo"
+                              )
+                              .map(x => x.name)
+                              .includes(primitive[0]) && (
+                              <img src={DownloadLogo} alt="Download" />
+                            )}
+                          </td>
+                        </tr>
+                      ))}
+                  </tbody>
+                )}
+              </AppContext.Consumer>
             </table>
           </div>
-          {selectedPrimitive !== "" && (
-            <div className="col-lg-9 graph">
-              <div className="primitiveName text-center">
-                {selectedPrimitive}
-              </div>
-              <div className="row primitiveDetails">
-                <div className="col-lg-5 description">
-                  The estimated overall key of the track. Integers map to
-                  pitches using standard Pitch Class notation . E.g. 0 = C, 1 =
-                  C♯/D♭, 2 = D, and so on. If no key was detected, the value is
-                  -1.
-                </div>
-                <div className="col-lg-7 graphPrimitive">
-                  <img src={GraphPic} alt="Primitive chart" />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </StyledTrackApp>
     );
@@ -188,6 +294,16 @@ const StyledExportToCsvButton = styled(StyledButton)`
 `;
 
 const StyledTrackApp = styled.div`
+  .spectrogram {
+    text-align: center;
+    box-shadow: 0 0 2px 2px ${lightGray};
+    margin-top: 20px;
+
+    img {
+      max-width: 100%;
+    }
+  }
+
   .trackContainer {
     padding: 20px;
     margin-top: 20px;
@@ -265,11 +381,26 @@ const StyledTrackApp = styled.div`
   
       tbody {
         td {
+          vertical-align: top;
           padding: 9px;
+
+          img {
+            height: 16px;
+            width: 16px;
+          }
+        }
+
+        .primitiveContent {
+          max-height: 50px;
+          overflow: hidden;
         }
 
         .selected {
           font-weight: bold;
+
+          .primitiveContent {
+            max-height: initial;
+          }
         }
 
         tr:nth-child(even) {background-color: ${lightGray}}
@@ -279,6 +410,7 @@ const StyledTrackApp = styled.div`
     .graph {
       box-shadow: 0 2px 10px ${lighten(0.85, black)};
       margin-top: 34px;
+      display: inline-table;
 
       .primitiveName {
         font-size: 17px;
@@ -292,7 +424,7 @@ const StyledTrackApp = styled.div`
         margin-top: 13px;
 
         .description {
-          padding-left: 30px;
+          padding: 0 15px 15px 15px;
         }
 
         .graphPrimitive {

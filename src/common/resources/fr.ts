@@ -48,5 +48,24 @@ export const fr: any = {
   deselectAll: "Effacer",
   pageLoading: "Chargement de la page",
   primitive: "Primitive",
-  value: "Valeur"
+  superPrimitives: "Super primitives",
+  value: "Valeur",
+  exportCsv: "Exporter les résultats en CSV",
+  genre: "Genre",
+  currentNumber: "Nombre courant",
+  cancel: "Annuler",
+  export: "Exporter",
+  changeNumberGenres:
+    "Vous pouvez modifier le nombre de chansons de chaque genre avant de les exporter.",
+  errorModal: "Veuillez corriger les erreurs avant d'exporter",
+  album: "Album",
+  name: "Nom",
+  songsInDatabase: "chansons dans la base de données",
+  songs: "Chansons",
+  addSongsByGenre: "Rajout de chansons par genre",
+  addSongsByNumber: "Rajout de chansons par nombre",
+  add: "Ajouter",
+  NumberOfNewGenres: "Nombre de nouveaux genres",
+  NumberOfSongsPerGenre: "Nombre de chansons par genre",
+  numberForGenre: "Nombre de chansons pour ce genre"
 };

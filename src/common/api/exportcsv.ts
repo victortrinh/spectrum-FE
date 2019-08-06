@@ -5,36 +5,29 @@ const client = axios.create({
   baseURL: env.pythonBaseUrl
 });
 
-export type Genre = {
-  id: number;
-  selected: boolean;
+export type Export = {
+  song_ids: number[];
+  primitive_ids: number[];
 };
 
-export type GenreId = {
-  id: number;
+export type ExportSuperPrimitive = {
+  song_ids: number[];
+  primitive_id: number;
 };
 
-export class GenresAPI {
-  async updateGenre(genre: Genre) {
-    return await this.perform("put", "/api/genre/update", genre);
+export class ExportCsvAPI {
+  async getCsv(data: Export) {
+    return this.perform("post", "/api/export/primitive", data);
   }
 
-  async getGenres() {
-    return this.perform("get", "/api/genre/all");
-  }
-
-  async getStats() {
-    return this.perform("get", "/api/genre/stats");
-  }
-
-  async deleteGenre(genreId: GenreId) {
-    this.perform("delete", "/api/genre/delete", genreId);
+  async getSuperPrimitiveCsv(data: ExportSuperPrimitive) {
+    return this.perform("post", "/api/export/super_primitive", data);
   }
 
   async perform(
     method: any,
     resource: any,
-    data: Genre | GenreId | null = null
+    data: Export | ExportSuperPrimitive | null = null
   ) {
     return client({
       method,
