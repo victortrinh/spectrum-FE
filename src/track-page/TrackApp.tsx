@@ -26,27 +26,29 @@ import {
   ExportSuperPrimitive
 } from "common/api/exportcsv";
 import AppContext from "AppContext";
+import { SpectrogramAPI } from "common/api/spectrogram";
 
 type State = {
   track: Song | null;
-  selectedPrimitive: string;
   selectedPrimitives: string[];
   allPrimitives: PrimitiveCheckboxModel[];
+  spectrogram: string;
 };
 
 export class TrackApp extends React.PureComponent<{ match: any }, State> {
   songsApi: SongsAPI = new SongsAPI();
   primitivesAPI: PrimitivesAPI = new PrimitivesAPI();
   exportCsvAPI: ExportCsvAPI = new ExportCsvAPI();
+  spectrogramAPI: SpectrogramAPI = new SpectrogramAPI();
 
   constructor(props: any) {
     super(props);
 
     this.state = {
       track: null,
-      selectedPrimitive: "",
       selectedPrimitives: [],
-      allPrimitives: []
+      allPrimitives: [],
+      spectrogram: ""
     };
   }
 
@@ -75,15 +77,26 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
         } as Song)
     );
 
+    const response = await this.spectrogramAPI
+      .getSpectrogram({ song_id: track.id })
+      .then(data => data);
+
+    const imgFile = new Blob([response.data]);
+    const spectrogram = URL.createObjectURL(imgFile);
+
     this.setState({
       track,
       selectedPrimitives,
-      allPrimitives
+      allPrimitives,
+      spectrogram
     });
   }
 
   selectPrimitive = (e: React.SyntheticEvent<HTMLTableRowElement>) => {
-    const selectedPrimitive = e.currentTarget.id;
+    if (e.currentTarget.classList.contains("selected")) {
+      e.currentTarget.classList.remove("selected");
+      return;
+    }
 
     if (e.currentTarget.parentElement) {
       const primitiveRows = e.currentTarget.parentElement.querySelectorAll<
@@ -93,10 +106,6 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
     }
 
     e.currentTarget.classList.add("selected");
-
-    this.setState({
-      selectedPrimitive
-    });
   };
 
   getSuperPrimitive = (trackId: number, super_primitive: string) => async (
@@ -151,7 +160,7 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
   };
 
   render() {
-    const { track, selectedPrimitive, allPrimitives } = this.state;
+    const { track, allPrimitives, spectrogram } = this.state;
 
     if (!track) {
       return <Loading />;
@@ -189,7 +198,13 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
             {track.sound && <ReactAudioPlayer src={track.sound} controls />}
           </div>
         </div>
-        <div className="primitivesContainer row mr-0 ml-0">
+
+        {spectrogram !== "" && (
+          <div className="spectrogram">
+            <img src={spectrogram} alt="Spectrogram" />
+          </div>
+        )}
+        <div className="primitivesContainer row">
           <div className="col-lg-6">
             <table>
               <thead>
@@ -262,21 +277,6 @@ export class TrackApp extends React.PureComponent<{ match: any }, State> {
               </AppContext.Consumer>
             </table>
           </div>
-          {selectedPrimitive !== "" && (
-            <div className="col-lg-6 graph">
-              <div className="primitiveName text-center">
-                {selectedPrimitive}
-              </div>
-              <div className="row primitiveDetails">
-                <div className="description">
-                  The estimated overall key of the track. Integers map to
-                  pitches using standard Pitch Class notation . E.g. 0 = C, 1 =
-                  C♯/D♭, 2 = D, and so on. If no key was detected, the value is
-                  -1.
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </StyledTrackApp>
     );
@@ -294,6 +294,16 @@ const StyledExportToCsvButton = styled(StyledButton)`
 `;
 
 const StyledTrackApp = styled.div`
+  .spectrogram {
+    text-align: center;
+    box-shadow: 0 0 2px 2px ${lightGray};
+    margin-top: 20px;
+
+    img {
+      max-width: 100%;
+    }
+  }
+
   .trackContainer {
     padding: 20px;
     margin-top: 20px;

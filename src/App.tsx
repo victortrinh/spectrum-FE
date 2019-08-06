@@ -19,6 +19,7 @@ import { PrimitivesAPI } from "common/api/primitives";
 import { TrackApp } from "track-page/TrackApp";
 import { SongsAPI, Song } from "common/api/songs";
 import { millisToMinutesAndSeconds } from "common/api/utilities";
+import { AddSongsApp } from "add-songs-page/AddSongs";
 
 type State = {
   loggedIn: boolean;
@@ -122,7 +123,6 @@ export default class App extends React.Component<{}, State> {
 
     if (!tracksDB) {
       tracksDB = await this.songsApi.getSongs().then(data => {
-        debugger;
         return data.data.songs.map(
           (song: Song) =>
             ({
@@ -130,6 +130,16 @@ export default class App extends React.Component<{}, State> {
               duration: millisToMinutesAndSeconds(Number(song.primitives[0][1]))
             } as Song)
         );
+      });
+
+      tracksDB.sort((a: Song, b: Song) => {
+        if (a.genre < b.genre) {
+          return -1;
+        }
+        if (a.genre > b.genre) {
+          return 1;
+        }
+        return 0;
       });
 
       sessionStorage.setItem("tracksDB", JSON.stringify(tracksDB));
@@ -265,6 +275,7 @@ export default class App extends React.Component<{}, State> {
           />
           <Route path="/needPermission" component={NeedPermissionApp} />
           <Route path="/track/:id" component={TrackApp} />
+          <PrivateRoute path="/addSongs" component={AddSongsApp} />
           <PrivateRoute path="/admin" component={AdminApp} />
           <PrivateRoute path="/createUser" component={CreateUserApp} />
         </Router>

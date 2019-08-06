@@ -17,6 +17,10 @@ export type Song = {
   sound: string | null;
 };
 
+export type DeleteSong = {
+  id: number;
+};
+
 export class SongsAPI {
   async getSongs() {
     return this.perform("get", "/api/song/all");
@@ -26,7 +30,15 @@ export class SongsAPI {
     return this.perform("get", "/api/song/" + trackId);
   }
 
-  async perform(method: any, resource: any, data: Song | null = null) {
+  async deleteSong(deleteSong: DeleteSong) {
+    this.perform("delete", "/api/song/delete", deleteSong);
+  }
+
+  async perform(
+    method: any,
+    resource: any,
+    data: Song | DeleteSong | null = null
+  ) {
     return client({
       method,
       url: resource,

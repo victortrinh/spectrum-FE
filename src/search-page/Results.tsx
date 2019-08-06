@@ -337,7 +337,16 @@ export class Results extends React.Component<Props, State> {
                         !x.is_super_primitive
                     )
                     .map((x, i) => {
-                      if (i === selectedPrimitives.length - 1) {
+                      if (
+                        i ===
+                        selectedPrimitives.filter(
+                          x =>
+                            !this.props.unselectedPrimitiveIdList.includes(
+                              x.id
+                            ) && !x.is_super_primitive
+                        ).length -
+                          1
+                      ) {
                         return (
                           <span className="text-uppercase" key={x.id}>
                             {x.name}
@@ -351,44 +360,51 @@ export class Results extends React.Component<Props, State> {
                         );
                       }
                     })}
-                  <table style={{ marginTop: "20px" }}>
-                    <thead>
-                      <tr>
-                        <th>
-                          <Resource resourceKey="superPrimitives" />
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {selectedPrimitives
-                        .filter(
-                          x =>
-                            !this.props.unselectedPrimitiveIdList.includes(
-                              x.id
-                            ) &&
-                            x.is_super_primitive &&
-                            x.name !== "estimated_tempo"
-                        )
-                        .map(primitive => (
-                          <tr key={primitive.name}>
-                            <td style={{ textTransform: "uppercase" }}>
-                              {primitive.name}
-                            </td>
-                            <td
-                              className="clickable"
-                              onClick={this.exportSuperPrimitive(primitive)}
-                              style={{ paddingLeft: "16px" }}
-                            >
-                              <img
-                                style={{ width: "16px", height: "16px" }}
-                                src={DownloadIcon}
-                                alt="Download"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                    </tbody>
-                  </table>
+                  {selectedPrimitives.some(
+                    x =>
+                      !this.props.unselectedPrimitiveIdList.includes(x.id) &&
+                      x.is_super_primitive &&
+                      x.name !== "estimated_tempo"
+                  ) && (
+                    <table style={{ marginTop: "20px" }}>
+                      <thead>
+                        <tr>
+                          <th>
+                            <Resource resourceKey="superPrimitives" />
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedPrimitives
+                          .filter(
+                            x =>
+                              !this.props.unselectedPrimitiveIdList.includes(
+                                x.id
+                              ) &&
+                              x.is_super_primitive &&
+                              x.name !== "estimated_tempo"
+                          )
+                          .map(primitive => (
+                            <tr key={primitive.name}>
+                              <td style={{ textTransform: "uppercase" }}>
+                                {primitive.name}
+                              </td>
+                              <td
+                                className="clickable"
+                                onClick={this.exportSuperPrimitive(primitive)}
+                                style={{ paddingLeft: "16px" }}
+                              >
+                                <img
+                                  style={{ width: "16px", height: "16px" }}
+                                  src={DownloadIcon}
+                                  alt="Download"
+                                />
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </ModalApp>
             )}
